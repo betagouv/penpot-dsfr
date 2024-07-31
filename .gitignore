@@ -1,0 +1,6 @@
+data/*
+!data/documents
+data/documents/*/*
+!data/documents/*/export/
+data/documents/*/export/*/*
+!data/documents/*/export/*/mapping.json

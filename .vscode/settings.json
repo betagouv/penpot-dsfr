@@ -1,0 +1,7 @@
+{
+  "editor.formatOnSave": true,
+  "eslint.packageManager": "npm",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "prettier.requireConfig": true
+}

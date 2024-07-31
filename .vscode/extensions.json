@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "christian-kohler.npm-intellisense",
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode",
+    "lacroixdavid1.vscode-format-context-menu",
+    "SimonSiefke.svg-preview"
+  ]
+}
