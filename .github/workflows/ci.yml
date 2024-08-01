@@ -1,0 +1,152 @@
+name: Continuous Integration
+on:
+  # TODO: enable this once Penpot SaaS has been patched for `figpot` to work
+  # schedule:
+  #   - cron: '0 7 * * 1' # Every monday at 7am
+  workflow_dispatch: # Allow triggering this pipeline manually
+env:
+  NODE_OPTIONS: --max_old_space_size=4096
+  NODE_VERSION: 20.15.0
+  PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX: .cache/ms-playwright
+concurrency:
+  # Prevent parallel builds of the same branch
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  requirements:
+    name: Synchronize design files
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Export npm store directory as an environment variable
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(npm config get cache)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup npm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-npm-store-
+          restore-keys: |
+            ${{ runner.os }}-npm-store-
+
+      - uses: actions/cache@v3
+        name: Setup figpot medias cache
+        with:
+          path: data/medias
+          key: ${{ runner.os }}-figpot-medias-
+          restore-keys: |
+            ${{ runner.os }}-figpot-medias-
+
+      - name: Install dependencies
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: npx figpot deps
+
+      - name: Synchronize beta file
+        timeout-minutes: 30
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: |
+          npx figpot document synchronize -d nVZ9lz6uDo0ZXAplLO6gxM:4192f1dd-455b-8162-8004-bc147f1fd182 \
+            --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='• Desktop • Thème clair' \
+            --exclude-node-pattern='• Mobile • Thème clair' \
+            --exclude-node-pattern='• Desktop et mobile • Thème clair' \
+            --exclude-component-pattern='Thème sombre' \
+            --exclude-typography-pattern='^Dark' \
+            --exclude-color-pattern='^Dark' \
+            --replace-font-pattern='^Marianne :Marianne' \
+            --ci
+
+      - name: Synchronize components file
+        timeout-minutes: 30
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: |
+          npx figpot document synchronize -d ZwJqyAQJhKNTfBZ2Tcfsvr:4192f1dd-455b-8162-8004-bc14a6309b7a \
+            --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='- Desktop - Thème clair' \
+            --exclude-node-pattern='- Mobile - Thème clair' \
+            --exclude-node-pattern='- Desktop et mobile - Thème clair' \
+            --exclude-component-pattern='Thème sombre' \
+            --exclude-typography-pattern='^Dark' \
+            --exclude-color-pattern='^Dark' \
+            --replace-font-pattern='^Marianne :Marianne' \
+            --ci
+
+      - name: Synchronize fundamentals file
+        timeout-minutes: 30
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: |
+          npx figpot document synchronize -d CHIW9mZNjya4KozI0ie5Wh:4192f1dd-455b-8162-8004-bc14516685d6 \
+            --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='Sombre' \
+            --exclude-node-pattern='- Desktop - Thème clair' \
+            --exclude-node-pattern='- Mobile - Thème clair' \
+            --exclude-node-pattern='- Desktop et mobile - Thème clair' \
+            --exclude-node-pattern='- Desktop - Clair' \
+            --exclude-node-pattern='- Mobile - Clair' \
+            --exclude-node-pattern='- Desktop et mobile - Clair' \
+            --exclude-node-pattern='(Grille|Espacements|Bloc marque) - Clair' \
+            --exclude-node-pattern='^Icônes fonctionnelles · Desktop et Mobile$' \
+            --exclude-component-pattern='Thème sombre' \
+            --exclude-typography-pattern='^Dark' \
+            --exclude-color-pattern='^Dark' \
+            --replace-font-pattern='^Marianne :Marianne' \
+            --ci
+
+      - name: Synchronize models file
+        timeout-minutes: 30
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: |
+          npx figpot document synchronize -d kFoRdLSKujMjM1urcr1bep:3d04e89b-bff0-8115-8004-bc14b0d5ec2d \
+            --exclude-node-pattern='Thème sombre' \
+            --exclude-component-pattern='Thème sombre' \
+            --exclude-typography-pattern='^Dark' \
+            --exclude-color-pattern='^Dark' \
+            --replace-font-pattern='^Marianne :Marianne' \
+            --ci
+
+      - name: Synchronize pictograms file
+        timeout-minutes: 30
+        env:
+          FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
+          PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
+          PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
+        run: |
+          npx figpot document synchronize -d pYpyw9MOpdmEwKqLcngqZP:3d04e89b-bff0-8115-8004-bc146981b940 \
+            --replace-font-pattern='^Marianne :Marianne' \
+            --ci
