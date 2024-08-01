@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > This port uses `figpot` which has been implemented and tested with a custom Penpot instance. To be widely used the Penpot SaaS must be patched... Be patient and follow the issue https://tree.taiga.io/project/penpot/us/8372 before `penpot-dsfr` is available ⏱️🚀
 
-This repository contains all the logic to automate the synchronization between [DSFR](https://github.com/GouvernementFR/dsfr) files from Figma and those on Penpot. The idea is to leverage the open-source Penpot design tool without requiring our design system team to change anything in their daily work. Figma files remain our sources of truth, and their "cloned" versions on Penpot provide a design tool for product teams that either struggle with Figma subscriptions, or with hosting sensitive designs outside France.
+This repository contains all the logic to automate the synchronization between [DSFR files from Figma](https://www.figma.com/@gouvfr) and those on Penpot. The idea is to leverage the open-source Penpot design tool without requiring our design system team to change anything in their daily work. Figma files remain our sources of truth, and their "cloned" versions on Penpot provide a design tool for product teams that either struggle with Figma subscriptions, or with hosting sensitive designs outside France.
 
 > [!IMPORTANT] > `penpot-dsfr` is an experiment and the user experience may not be perfect (mainly due to technical limitations). Do not hesitate to share your thoughts by contacting us at [contact@beta.gouv.fr](mailto:contact@beta.gouv.fr).
 
@@ -11,7 +11,7 @@ This repository contains all the logic to automate the synchronization between [
 
 ### Set up Fonts
 
-All the files we synchronize use the font `Marianne` (the official font for the DSFR), so in your Penpot team settings, you must upload the 12 files for this font (you can retrieve them from [here](https://www.systeme-de-design.gouv.fr/fondamentaux/typographie/)).
+All the files we synchronize use the font `Marianne` (the official font for the [DSFR](https://github.com/GouvernementFR/dsfr)), so in your Penpot team settings, you must upload the 12 files for this font (you can retrieve them from [here](https://www.systeme-de-design.gouv.fr/fondamentaux/typographie/)).
 
 In case you want to use the file `DSFR - Modèles - Vx.y.z`, it's a bit unexpected, but it requires the font `Arial`. In this case, browse your fonts folder locally and find `Arial` files at least for variants `Regular`, `Regular Italic`, `Bold`, `Bold Italic`. _(In the future we may force the removal of `Arial` to simplify the process since this is not an open-source font)_
 
@@ -38,6 +38,12 @@ Think of this port as a technical library for designing your application rather 
 ## Technical setup of this repository
 
 The automation is based on the "Figma to Penpot" synchronizer named [figpot](https://github.com/sneko/figpot). See the file `.github/workflows/ci.yaml` for all commands run as a cron job.
+
+### Figma files
+
+Figma files onto https://www.figma.com/@gouvfr are not directly by used `penpot-dsfr` because they are owned by the account of [the SIG team](https://www.info.gouv.fr/organisation/service-d-information-du-gouvernement-sig). Sincce we do not have access to their Figma access token (needed to access extra-information like Figma styles), we copied their files into our own workspace to be able to retrieve all information.
+
+_We will make sure to update our own files when they do updates on theirs._
 
 ### GitHub secrets
 
