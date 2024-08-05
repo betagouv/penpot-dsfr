@@ -73,6 +73,7 @@ jobs:
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
+            --sync-mapping-with-git \
             --ci
 
       - name: Synchronize components file
@@ -93,6 +94,7 @@ jobs:
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
+            --sync-mapping-with-git \
             --ci
 
       - name: Synchronize fundamentals file
@@ -119,6 +121,7 @@ jobs:
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
+            --sync-mapping-with-git \
             --ci
 
       - name: Synchronize models file
@@ -136,6 +139,7 @@ jobs:
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
+            --sync-mapping-with-git \
             --ci
 
       - name: Synchronize pictograms file
@@ -149,4 +153,5 @@ jobs:
         run: |
           npx figpot document synchronize -d pYpyw9MOpdmEwKqLcngqZP:3d04e89b-bff0-8115-8004-bc146981b940 \
             --replace-font-pattern='^Marianne :Marianne' \
+            --sync-mapping-with-git \
             --ci
