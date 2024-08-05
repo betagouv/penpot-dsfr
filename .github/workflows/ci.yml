@@ -135,6 +135,7 @@ jobs:
         run: |
           npx figpot document synchronize -d kFoRdLSKujMjM1urcr1bep:3d04e89b-bff0-8115-8004-bc14b0d5ec2d \
             --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='Sombre' \
             --exclude-component-pattern='Thème sombre' \
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
