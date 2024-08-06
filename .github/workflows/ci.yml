@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         env:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
-        run: npx figpot deps
+        run: npx @betagouv/figpot deps
 
       - name: Synchronize beta file
         timeout-minutes: 30
@@ -64,7 +64,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx figpot document synchronize -d nVZ9lz6uDo0ZXAplLO6gxM:4192f1dd-455b-8162-8004-bc147f1fd182 \
+          npx @betagouv/figpot document synchronize -d nVZ9lz6uDo0ZXAplLO6gxM:4192f1dd-455b-8162-8004-bc147f1fd182 \
             --exclude-node-pattern='Thème sombre' \
             --exclude-node-pattern='• Desktop • Thème clair' \
             --exclude-node-pattern='• Mobile • Thème clair' \
@@ -85,7 +85,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx figpot document synchronize -d ZwJqyAQJhKNTfBZ2Tcfsvr:4192f1dd-455b-8162-8004-bc14a6309b7a \
+          npx @betagouv/figpot document synchronize -d ZwJqyAQJhKNTfBZ2Tcfsvr:4192f1dd-455b-8162-8004-bc14a6309b7a \
             --exclude-node-pattern='Thème sombre' \
             --exclude-node-pattern='- Desktop - Thème clair' \
             --exclude-node-pattern='- Mobile - Thème clair' \
@@ -106,7 +106,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx figpot document synchronize -d CHIW9mZNjya4KozI0ie5Wh:4192f1dd-455b-8162-8004-bc14516685d6 \
+          npx @betagouv/figpot document synchronize -d CHIW9mZNjya4KozI0ie5Wh:4192f1dd-455b-8162-8004-bc14516685d6 \
             --exclude-node-pattern='Thème sombre' \
             --exclude-node-pattern='Sombre' \
             --exclude-node-pattern='- Desktop - Thème clair' \
@@ -133,7 +133,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx figpot document synchronize -d kFoRdLSKujMjM1urcr1bep:3d04e89b-bff0-8115-8004-bc14b0d5ec2d \
+          npx @betagouv/figpot document synchronize -d kFoRdLSKujMjM1urcr1bep:3d04e89b-bff0-8115-8004-bc14b0d5ec2d \
             --exclude-node-pattern='Thème sombre' \
             --exclude-node-pattern='Sombre' \
             --exclude-component-pattern='Thème sombre' \
@@ -152,7 +152,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx figpot document synchronize -d pYpyw9MOpdmEwKqLcngqZP:3d04e89b-bff0-8115-8004-bc146981b940 \
+          npx @betagouv/figpot document synchronize -d pYpyw9MOpdmEwKqLcngqZP:3d04e89b-bff0-8115-8004-bc146981b940 \
             --replace-font-pattern='^Marianne :Marianne' \
             --sync-mapping-with-git \
             --ci

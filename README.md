@@ -1,7 +1,7 @@
 # penpot-dsfr
 
 > [!IMPORTANT]
-> This port uses `figpot` which has been implemented and tested with a custom Penpot instance. To be widely used the Penpot SaaS must be patched... Be patient and follow the issue https://tree.taiga.io/project/penpot/us/8372 before `penpot-dsfr` is available ⏱️🚀
+> This port uses `@betagouv/figpot` which has been implemented and tested with a custom Penpot instance. To be widely used the Penpot SaaS must be patched... Be patient and follow the issue https://tree.taiga.io/project/penpot/us/8372 before `penpot-dsfr` is available ⏱️🚀
 
 This repository contains all the logic to automate the synchronization between [DSFR files from Figma](https://www.figma.com/@gouvfr) and those on Penpot. The idea is to leverage the open-source Penpot design tool without requiring our design system team to change anything in their daily work. Figma files remain our sources of truth, and their "cloned" versions on Penpot provide a design tool for product teams that either struggle with Figma subscriptions, or with hosting sensitive designs outside France.
 
@@ -37,7 +37,7 @@ Think of this port as a technical library for designing your application rather 
 
 ## Technical setup of this repository
 
-The automation is based on the "Figma to Penpot" synchronizer named [figpot](https://github.com/sneko/figpot). See the file `.github/workflows/ci.yaml` for all commands run as a cron job.
+The automation is based on the "Figma to Penpot" synchronizer named [figpot](https://github.com/betagouv/figpot). See the file `.github/workflows/ci.yaml` for all commands run as a cron job.
 
 ### Figma files
 
