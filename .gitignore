@@ -1,6 +1,20 @@
+# tools settings folders
+/**/.*/**/*
+!.github/**/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+
+# dependencies
+node_modules
+
+# data
 data/*
 !data/documents
 data/documents/*/*
 !data/documents/*/export/
 data/documents/*/export/*/*
 !data/documents/*/export/*/mapping.json
+
+# local env files
+*.local
