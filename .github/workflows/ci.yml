@@ -65,11 +65,20 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
           npx @betagouv/figpot document synchronize -d nVZ9lz6uDo0ZXAplLO6gxM:4192f1dd-455b-8162-8004-bc147f1fd182 \
+            --exclude-page-pattern='Bienvenue$' \
+            --exclude-node-pattern='^⚙️ Symboles$' \
+            --exclude-node-pattern='^🚫 Éléments$' \
+            --exclude-node-pattern='- Introduction - Thème clair' \
+            --exclude-node-pattern='• Introduction •' \
             --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='sombre$' \
+            --exclude-node-pattern='Thème=Sombre' \
             --exclude-node-pattern='• Desktop • Thème clair' \
             --exclude-node-pattern='• Mobile • Thème clair' \
             --exclude-node-pattern='• Desktop et mobile • Thème clair' \
+            --exclude-node-pattern='^🚫 /' \
             --exclude-component-pattern='Thème sombre' \
+            --exclude-component-pattern='Thème=Sombre' \
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
@@ -86,11 +95,19 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
           npx @betagouv/figpot document synchronize -d ZwJqyAQJhKNTfBZ2Tcfsvr:4192f1dd-455b-8162-8004-bc14a6309b7a \
+            --exclude-page-pattern='Bienvenue$' \
+            --exclude-page-pattern='Espace de travail$' \
+            --exclude-node-pattern='^⚙️ Symboles$' \
+            --exclude-node-pattern='^🚫 Éléments$' \
             --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='Thème=Sombre' \
+            --exclude-node-pattern='- Introduction - Thème clair' \
             --exclude-node-pattern='- Desktop - Thème clair' \
             --exclude-node-pattern='- Mobile - Thème clair' \
             --exclude-node-pattern='- Desktop et mobile - Thème clair' \
+            --exclude-node-pattern='^🚫 /' \
             --exclude-component-pattern='Thème sombre' \
+            --exclude-component-pattern='Thème=Sombre' \
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
@@ -107,6 +124,12 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
           npx @betagouv/figpot document synchronize -d CHIW9mZNjya4KozI0ie5Wh:4192f1dd-455b-8162-8004-bc14516685d6 \
+            --exclude-page-pattern='Bienvenue$' \
+            --exclude-page-pattern='Espace de travail$' \
+            --exclude-node-pattern='^⚙️ Symboles$' \
+            --exclude-node-pattern='^🚫 Éléments$' \
+            --exclude-node-pattern='Introduction -' \
+            --exclude-node-pattern='· Introduction' \
             --exclude-node-pattern='Thème sombre' \
             --exclude-node-pattern='Sombre' \
             --exclude-node-pattern='- Desktop - Thème clair' \
@@ -115,8 +138,9 @@ jobs:
             --exclude-node-pattern='- Desktop - Clair' \
             --exclude-node-pattern='- Mobile - Clair' \
             --exclude-node-pattern='- Desktop et mobile - Clair' \
-            --exclude-node-pattern='(Grille|Espacements|Bloc marque) - Clair' \
+            --exclude-node-pattern='(Grille|Espacements|Listes|Bloc marque) - Clair' \
             --exclude-node-pattern='^Icônes fonctionnelles · Desktop et Mobile$' \
+            --exclude-node-pattern='^🚫 /' \
             --exclude-component-pattern='Thème sombre' \
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
@@ -134,9 +158,15 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
           npx @betagouv/figpot document synchronize -d kFoRdLSKujMjM1urcr1bep:3d04e89b-bff0-8115-8004-bc14b0d5ec2d \
+            --exclude-page-pattern='Bienvenue$' \
+            --exclude-page-pattern='Espace de travail$' \
+            --exclude-node-pattern='- Introduction$' \
             --exclude-node-pattern='Thème sombre' \
+            --exclude-node-pattern='Thème=Sombre' \
             --exclude-node-pattern='Sombre' \
+            --exclude-node-pattern='^🚫 /' \
             --exclude-component-pattern='Thème sombre' \
+            --exclude-component-pattern='Thème=Sombre' \
             --exclude-typography-pattern='^Dark' \
             --exclude-color-pattern='^Dark' \
             --replace-font-pattern='^Marianne :Marianne' \
@@ -153,6 +183,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
           npx @betagouv/figpot document synchronize -d pYpyw9MOpdmEwKqLcngqZP:3d04e89b-bff0-8115-8004-bc146981b940 \
+            --exclude-page-pattern='Lisez-moi$' \
             --replace-font-pattern='^Marianne :Marianne' \
             --sync-mapping-with-git \
             --ci
