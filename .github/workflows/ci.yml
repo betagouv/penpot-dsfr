@@ -64,7 +64,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx @betagouv/figpot document synchronize -d nVZ9lz6uDo0ZXAplLO6gxM:4192f1dd-455b-8162-8004-bc147f1fd182 \
+          npx @betagouv/figpot document synchronize -d DwgchHaiTstmQn2GfkG5So:029b7a64-19bf-80ba-8006-dba5db6266b8 \
             --exclude-page-pattern='Bienvenue$' \
             --exclude-node-pattern='^⚙️ Symboles$' \
             --exclude-node-pattern='^🚫 Éléments$' \
@@ -94,7 +94,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx @betagouv/figpot document synchronize -d ZwJqyAQJhKNTfBZ2Tcfsvr:4192f1dd-455b-8162-8004-bc14a6309b7a \
+          npx @betagouv/figpot document synchronize -d fMUBQGfKFzsvlEoryc4owQ:599d0b1e-999a-8087-8006-dba5e4913b4b \
             --exclude-page-pattern='Bienvenue$' \
             --exclude-page-pattern='Espace de travail$' \
             --exclude-node-pattern='^⚙️ Symboles$' \
@@ -123,7 +123,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx @betagouv/figpot document synchronize -d CHIW9mZNjya4KozI0ie5Wh:4192f1dd-455b-8162-8004-bc14516685d6 \
+          npx @betagouv/figpot document synchronize -d buAUjcIJHylA7LPzx872ne:029b7a64-19bf-80ba-8006-dba5e0d9537e \
             --exclude-page-pattern='Bienvenue$' \
             --exclude-page-pattern='Espace de travail$' \
             --exclude-node-pattern='^⚙️ Symboles$' \
@@ -157,7 +157,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx @betagouv/figpot document synchronize -d kFoRdLSKujMjM1urcr1bep:3d04e89b-bff0-8115-8004-bc14b0d5ec2d \
+          npx @betagouv/figpot document synchronize -d t51G87VdWvpeMLG7Vbax3t:599d0b1e-999a-8087-8006-dba5d66d8c86 \
             --exclude-page-pattern='Bienvenue$' \
             --exclude-page-pattern='Espace de travail$' \
             --exclude-node-pattern='- Introduction$' \
@@ -182,7 +182,7 @@ jobs:
           PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
         run: |
-          npx @betagouv/figpot document synchronize -d pYpyw9MOpdmEwKqLcngqZP:3d04e89b-bff0-8115-8004-bc146981b940 \
+          npx @betagouv/figpot document synchronize -d WgxeOWvxadSJu3zxu3T38J:599d0b1e-999a-8087-8006-dba5dedde022 \
             --exclude-page-pattern='Lisez-moi$' \
             --replace-font-pattern='^Marianne :Marianne' \
             --sync-mapping-with-git \
