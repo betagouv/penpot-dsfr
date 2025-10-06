@@ -34,12 +34,12 @@ In case you want to use the file `DSFR - Modèles - Vx.y.z`, it's a bit unexpect
 Go to https://github.com/betagouv/penpot-dsfr/releases and for each version your will have all DSFR files in the Penpot format `.penpot`:
 
 - `DSFR - Composants - v1.xx (Community)`
-- `DSFR - Fondamentaux - v1.14 (Community)`
-- `DSFR - Modèles - V1.14 (Community)`
-- `DSFR - Bêta - V1.14 (Community)`
-- `DSFR - Pictogrammes - V1.14 (Community)`
+- `DSFR - Fondamentaux - v1.xx (Community)`
+- `DSFR - Modèles - V1.xx (Community)`
+- `DSFR - Bêta - V1.xx (Community)`
+- `DSFR - Pictogrammes - V1.xx (Community)`
 
-Download them within your Penpot workspace you can create a new project (named for example `DSFR`) and by overlaying the project area you will see a `three dots` button to trigger `Import Penpot files`.
+Download them, then within your Penpot workspace you can create a new project (named for example `DSFR`) and by overlaying the project area you will see a `three dots` button to trigger `Import Penpot files`.
 
 Once done and from your project view, right click on each of those imported file and click `Add as Shared Library` and confirm your choice. Like that their components, colors and typographies can be accessed from other files.
 
