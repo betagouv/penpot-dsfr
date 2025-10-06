@@ -53,7 +53,7 @@ Let's say you have created a new file to mock up your future application:
 2. Switch to the `Assets` tab section
 3. Click `Manage library` and wait for it to load fully
 4. Click on the `+` button for shared files `Composants`, `Fondamentaux` and `Pictogrammes`
-5. Then within the `Assets` panel, type in the searchbar for example `bouton` and after opening the nested tree you should see:
+5. Then within the `Assets` panel, type in the search bar for example `bouton` and after opening the nested tree you should see:
 
    <img src="docs/components_panel.png" alt="" height="350">
 
@@ -102,7 +102,7 @@ _Due to no sponsor of this initiative the synchronization is disabled for now, t
 
 ### Figma files
 
-Figma files onto https://www.figma.com/@gouvfr are not directly by used `penpot-dsfr` because they are owned by the account of [the SIG team](https://www.info.gouv.fr/organisation/service-d-information-du-gouvernement-sig). Sincce we do not have access to their Figma access token (needed to access extra-information like Figma styles), we copied their files into our own workspace to be able to retrieve all information.
+Figma files onto https://www.figma.com/@gouvfr are not directly used by `penpot-dsfr` because they are owned by the account of [the SIG team](https://www.info.gouv.fr/organisation/service-d-information-du-gouvernement-sig). Since we do not have access to their Figma access token (needed to access extra-information like Figma styles), we copied their files into our own workspace to be able to retrieve all information.
 
 _We will make sure to update our own files when they do updates on theirs._
 
