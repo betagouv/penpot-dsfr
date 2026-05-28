@@ -21,7 +21,7 @@ To have DSFR files well displayed your team workspace need to know about specifi
 
 1. Download the 12 font variants with TTF format from the bottom page of https://www.info.gouv.fr/marque-de-letat/la-typographie
 2. Unzip the archive
-3. Log on https://design.penpot.app and if the left panel go to the `Fonts` section
+3. Log on https://design.penpot.app and in the left panel go to the `Fonts` section
 4. Click `Add custom font`, select the 12 font variants just downloaded and validate
 5. Once you see them listed as "pending" in the interface, click on `Upload all`
 
