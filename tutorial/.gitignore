@@ -1,0 +1,7 @@
+node_modules
+dist
+*.local
+
+# assets copied or downloaded by scripts
+public/dsfr
+public/releases

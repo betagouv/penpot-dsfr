@@ -1,0 +1,103 @@
+name: Tutorial and documentation
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tutorial/**'
+      - 'documentation/**'
+      - '.github/workflows/tutorial.yml'
+  pull_request:
+    paths:
+      - 'tutorial/**'
+      - 'documentation/**'
+      - '.github/workflows/tutorial.yml'
+  # A new release means new `.penpot` files to mirror into the tutorial
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to propose in the tutorial (latest one if empty)'
+        required: false
+env:
+  NODE_VERSION: 24.14.0
+concurrency:
+  group: tutorial-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            tutorial/package-lock.json
+            documentation/package-lock.json
+
+      - name: Install tutorial dependencies
+        working-directory: tutorial
+        run: npm ci
+
+      - name: Check tutorial
+        working-directory: tutorial
+        run: |
+          npm run format:check
+          npm run lint
+          npm run test:unit
+
+      - name: Mirror the release files
+        working-directory: tutorial
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag || (github.event_name == 'release' && github.event.release.tag_name) || '' }}
+        run: npm run release:prepare
+
+      - name: Build tutorial and Storybook
+        working-directory: tutorial
+        run: |
+          npm run build
+          npm run build:storybook
+
+      - name: Build documentation preview
+        working-directory: documentation
+        env:
+          # Make the preview modal target the tutorial deployed alongside
+          TUTORIAL_URL: ../../
+        run: |
+          npm ci
+          npm run format:check
+          npm run build
+          cp -r dist ../tutorial/dist/documentation
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tutorial/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

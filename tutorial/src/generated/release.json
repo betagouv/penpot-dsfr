@@ -1,0 +1,54 @@
+{
+  "repository": "betagouv/penpot-dsfr",
+  "tag": "release-04102025",
+  "name": "DSFR on Penpot - v1.14 (through figpot v1)",
+  "publishedAt": "2025-10-03T22:04:36Z",
+  "htmlUrl": "https://github.com/betagouv/penpot-dsfr/releases/tag/release-04102025",
+  "files": {
+    "pictogrammes": {
+      "assetName": "dsfr_pictogrammes_v1-14.penpot",
+      "path": "releases/release-04102025/dsfr_pictogrammes_v1-14.penpot",
+      "downloadUrl": "https://github.com/betagouv/penpot-dsfr/releases/download/release-04102025/dsfr_pictogrammes_v1-14.penpot",
+      "size": 2409140,
+      "fileId": "599d0b1e-999a-8087-8006-dba5dedde022",
+      "fileName": "DSFR - Pictogrammes - V1.14 (Community)",
+      "references": []
+    },
+    "fondamentaux": {
+      "assetName": "dsfr_fondamentaux_v1-14.penpot",
+      "path": "releases/release-04102025/dsfr_fondamentaux_v1-14.penpot",
+      "downloadUrl": "https://github.com/betagouv/penpot-dsfr/releases/download/release-04102025/dsfr_fondamentaux_v1-14.penpot",
+      "size": 35512349,
+      "fileId": "029b7a64-19bf-80ba-8006-dba5e0d9537e",
+      "fileName": "DSFR - Fondamentaux - v1.14 (Community)",
+      "references": []
+    },
+    "composants": {
+      "assetName": "dsfr_composants_v1-14.penpot",
+      "path": "releases/release-04102025/dsfr_composants_v1-14.penpot",
+      "downloadUrl": "https://github.com/betagouv/penpot-dsfr/releases/download/release-04102025/dsfr_composants_v1-14.penpot",
+      "size": 93188371,
+      "fileId": "599d0b1e-999a-8087-8006-dba5e4913b4b",
+      "fileName": "DSFR - Composants - v1.14 (Community)",
+      "references": []
+    },
+    "modeles": {
+      "assetName": "dsfr_modeles_v1-14.penpot",
+      "path": "releases/release-04102025/dsfr_modeles_v1-14.penpot",
+      "downloadUrl": "https://github.com/betagouv/penpot-dsfr/releases/download/release-04102025/dsfr_modeles_v1-14.penpot",
+      "size": 16548891,
+      "fileId": "599d0b1e-999a-8087-8006-dba5d66d8c86",
+      "fileName": "DSFR - Modèles - V1.14 (Community)",
+      "references": []
+    },
+    "beta": {
+      "assetName": "dsfr_beta_v1-14.penpot",
+      "path": "releases/release-04102025/dsfr_beta_v1-14.penpot",
+      "downloadUrl": "https://github.com/betagouv/penpot-dsfr/releases/download/release-04102025/dsfr_beta_v1-14.penpot",
+      "size": 6001417,
+      "fileId": "029b7a64-19bf-80ba-8006-dba5db6266b8",
+      "fileName": "DSFR - Bêta - V1.14 (Community)",
+      "references": []
+    }
+  }
+}

@@ -9,6 +9,9 @@ This repository contains all the logic to automate the synchronization between [
 
 ## Prepare DSFR as libraries on Penpot
 
+> [!TIP]
+> An interactive tutorial (in French) guides you through the steps below and prepares files so they are bound to each other in your workspace (which the manual import cannot do). See [`tutorial/`](tutorial/) for its source code and [`documentation/`](documentation/) for the page proposed to https://www.systeme-de-design.gouv.fr/.
+
 ### Files must be uploaded by yourself
 
 There is no marketplace where our published files can be cloned easily, and Penpot teams workspaces are isolated so we cannot connect your account directly on the files we want public.

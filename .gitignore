@@ -4,6 +4,7 @@
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/settings.json
+!tutorial/.storybook/**/*
 
 # dependencies
 node_modules
