@@ -67,24 +67,30 @@ jobs:
         env:
           FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
           PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
-        run: ./scripts/synchronize.sh pictogrammes --sync-mapping-with-git --ci
+        run: xvfb-run -a ./scripts/synchronize.sh pictogrammes --sync-mapping-with-git --ci
 
       - name: Synchronize fundamentals file
         timeout-minutes: 180
         env:
           FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
           PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
-        run: ./scripts/synchronize.sh fondamentaux --sync-mapping-with-git --ci
+        run: xvfb-run -a ./scripts/synchronize.sh fondamentaux --sync-mapping-with-git --ci
 
       - name: Synchronize components file
         timeout-minutes: 180
         env:
           FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
           PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
-        run: ./scripts/synchronize.sh composants --sync-mapping-with-git --ci
+        run: xvfb-run -a ./scripts/synchronize.sh composants --sync-mapping-with-git --ci
 
       - name: Synchronize models file
         timeout-minutes: 180
@@ -99,5 +105,7 @@ jobs:
         env:
           FIGMA_ACCESS_TOKEN: ${{ secrets.FIGMA_ACCESS_TOKEN }}
           PENPOT_ACCESS_TOKEN: ${{ secrets.PENPOT_ACCESS_TOKEN }}
+          PENPOT_USER_EMAIL: ${{ secrets.PENPOT_USER_EMAIL }}
+          PENPOT_USER_PASSWORD: ${{ secrets.PENPOT_USER_PASSWORD }}
           PLAYWRIGHT_BROWSERS_PATH: ${{ env.STORE_PATH }}/${{ env.PLAYWRIGHT_BROWSERS_CACHE_FOLDER_SUFFIX }}
-        run: ./scripts/synchronize.sh beta --sync-mapping-with-git --ci
+        run: xvfb-run -a ./scripts/synchronize.sh beta --sync-mapping-with-git --ci

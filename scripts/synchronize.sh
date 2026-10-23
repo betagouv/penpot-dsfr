@@ -63,11 +63,12 @@ case "$file" in
     ;;
 esac
 
-# Hydration is skipped: it opens the Penpot interface with the user credentials, and the files must be kept exactly as computed from Figma
+# Hydration opens each page in the Penpot interface (with PENPOT_USER_EMAIL and PASSWORD, and a display, e.g. through `xvfb-run`)
+# so Penpot computes what figpot cannot and applies pending library updates, so opening the files later does not change them.
+# Pass `--no-hydrate` to skip it
 # Figma exposes the font as "Marianne " (with a trailing space) whereas it's "Marianne" on Penpot
 # shellcheck disable=SC2086
 exec $FIGPOT document synchronize "${arguments[@]}" \
   --replace-font-pattern='^Marianne :Marianne' \
   --data-dir "$DATA_DIR" \
-  --no-hydrate \
   "$@"
