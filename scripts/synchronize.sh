@@ -9,8 +9,9 @@
 #   FIGPOT="npm --prefix ../betagouv-figpot run --silent cli:unsecure --"
 # - FIGMA_ACCESS_TOKEN, PENPOT_ACCESS_TOKEN, PENPOT_BASE_URL (see figpot documentation)
 #
-# Files are synchronized as-is (no page, node, component, color or typography exclusion) so the Penpot files are a faithful copy
-# of the Figma ones, and so components used by mockups transferred with the Penpot Exporter Figma plugin can always be bound
+# Files are synchronized as-is (no page, component, color or typography exclusion) so the Penpot files are a faithful copy
+# of the Figma ones, and so components used by mockups transferred with the Penpot Exporter Figma plugin can always be bound.
+# The only exception is the presentation frames of Composants (see below)
 #
 
 set -euo pipefail
@@ -23,7 +24,7 @@ FIGPOT="${FIGPOT:-npx --yes @betagouv/figpot@^2}"
 # Figma file key : Penpot file ID
 PICTOGRAMMES='LvF3nrRe78xEq04CoMh0Cb:e25681ff-0a72-80e7-8008-d43fe8b8f7b6'
 FONDAMENTAUX='IAK0vJ81qzdNQsLrsvHIv4:e25681ff-0a72-80e7-8008-d43ff975221d'
-COMPOSANTS='1KbbYzOMcFHmtiurClFxQv:f7e4e924-d5db-819f-8008-d4405d9f92be'
+COMPOSANTS='1KbbYzOMcFHmtiurClFxQv:74db4ea5-7f73-8164-8008-d59996f78b49'
 MODELES='utZfOiJzvpa7ZqDVGJ8fsu:f7e4e924-d5db-819f-8008-d4406779827e'
 BETA='TdCIBjiJD9kBchMhBrLjQQ:e25681ff-0a72-80e7-8008-d4406eaf8091'
 
@@ -38,7 +39,22 @@ case "$file" in
   # they are kept as plain shapes to avoid a circular dependency. Any other library referenced will stop the synchronization
   # (to spot Figma files not linked to the right libraries)
   fondamentaux) arguments=(-d "$FONDAMENTAUX" -l "$PICTOGRAMMES" --detach-library "${COMPOSANTS%%:*}") ;;
-  composants) arguments=(-d "$COMPOSANTS" -l "$FONDAMENTAUX" -l "$PICTOGRAMMES") ;;
+  # The desktop and mobile presentation frames (light and dark) are excluded: built from instances, they are half of the file
+  # (about 250k elements). With them, each update got slower as the Penpot file grew, since the instance loads and checks the
+  # whole file at every update. Past about 60 seconds its proxy gives up (gateway timeout, the update may still be applied
+  # behind) or the instance itself fails (server error). Once the file reached about 370k nodes on Penpot, even an empty
+  # update failed, so the synchronization could not go further. The components (light and dark) and the welcome page are kept
+  composants)
+    arguments=(
+      -d "$COMPOSANTS" -l "$FONDAMENTAUX" -l "$PICTOGRAMMES"
+      --exclude-node-pattern='- Desktop - Thème clair'
+      --exclude-node-pattern='- Mobile - Thème clair'
+      --exclude-node-pattern='- Desktop et mobile - Thème clair'
+      --exclude-node-pattern='- Desktop - Thème sombre'
+      --exclude-node-pattern='- Mobile - Thème sombre'
+      --exclude-node-pattern='- Desktop et mobile - Thème sombre'
+    )
+    ;;
   modeles) arguments=(-d "$MODELES" -l "$PICTOGRAMMES" -l "$FONDAMENTAUX" -l "$COMPOSANTS") ;;
   beta) arguments=(-d "$BETA" -l "$PICTOGRAMMES" -l "$FONDAMENTAUX" -l "$COMPOSANTS") ;;
   *)
