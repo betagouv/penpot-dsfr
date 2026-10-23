@@ -99,7 +99,7 @@ This kind of feature inside Penpot does not exist yet and we did not find an eas
 
 ## Technical setup of this repository
 
-The automation is based on the "Figma to Penpot" synchronizer named [figpot](https://github.com/betagouv/figpot). See the file `.github/workflows/ci.yaml` for all commands run as a cron job.
+The automation is based on the "Figma to Penpot" synchronizer named [figpot](https://github.com/betagouv/figpot). See `scripts/synchronize.sh` for the exact parameters of each file, and `.github/workflows/ci.yml` for how it is run.
 
 _Due to no sponsor of this initiative the synchronization is disabled for now, the current synchronization and export has been run manually._
 
