@@ -10,7 +10,9 @@ export interface DsfrFileDefinition {
   optional: boolean;
   // Used to find the right asset into a GitHub release (`dsfr_composants_v1-14.penpot`...)
   assetPattern: RegExp;
-  // Fonts needed in the Penpot team so the file renders correctly
+  // Shown when importing the file, to explain differences with the Figma file
+  note?: string;
+  // Proprietary fonts needed in the Penpot team so the file renders correctly (they cannot be provided, only added from the user computer)
   extraFonts?: string[];
 }
 
@@ -34,6 +36,7 @@ export const dsfrFiles: Record<DsfrFileKey, DsfrFileDefinition> = {
     key: 'composants',
     label: 'Composants',
     description: 'Les composants d’interface (boutons, en-tête, formulaires…) à utiliser dans vos maquettes.',
+    note: 'Pour rester fluide dans Penpot, ce fichier ne contient pas les planches d’exemples présentant chaque composant en contexte (desktop et mobile) : il diffère donc du fichier Figma, mais tous les composants, en thème clair comme en thème sombre, sont présents.',
     optional: false,
     assetPattern: /composants/i,
   },

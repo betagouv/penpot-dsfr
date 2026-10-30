@@ -6,35 +6,33 @@ It is meant to be displayed into a modal (iframe) of https://www.systeme-de-desi
 
 ## How it works
 
-Penpot has no way to share a library across teams, so each team imports the DSFR files on its own. Since the files reference each other (`Composants` uses colors, typographies and components of `Fondamentaux` and `Pictogrammes`...), the references would point to the file IDs of our own workspace and be broken.
+Penpot has no way to share a library across teams, so each team imports the DSFR files on its own. Since the files reference each other (`Composants` uses colors, typographies and components of `Fondamentaux` and `Pictogrammes`...), they must be imported in the dependency order, each one shared as a library before importing the next.
 
-The tutorial makes the user import files one by one in the dependency order and, after each import, asks for the Penpot URL of the imported file (it contains its `file-id`). The next file is then:
+Since Penpot 2.19, importing a `.penpot` file links each library it uses to the shared file of the team having the same name (when there is exactly one, otherwise Penpot asks which one to use). So the release files are imported as they are: the tutorial only links to them (directly on the GitHub release, a plain download needs no CORS headers) and explains each step. Users must not rename the imported files.
 
-1. downloaded from the tutorial website (release files are mirrored there at build time, GitHub release downloads have no CORS headers)
-2. rewritten in a web worker (`src/utils/penpot-archive.ts`): in every JSON entry of the archive, the file IDs of our workspace are replaced by the ones of the user workspace, and the libraries are declared into the `relations` of the manifest so Penpot connects them at import time (`linkLibrariesAtImport` in `src/config/tutorial.ts`)
-3. handed to the browser as a download, ready to be imported into Penpot
-
-Only the modified entries are recompressed, others are copied as is, so the ~100 MB `Composants` file is processed in a few seconds. ZIP64 archives (more than 65535 entries) are supported.
-
-The file IDs to replace and the references between files are computed by `npm run release:prepare`, which reads the release assets and writes `src/generated/release.json`.
+`npm run release:prepare` describes the latest release into `src/generated/release.json`: it downloads the assets into a cache folder only to read, from their manifest, the name each file will have in Penpot.
 
 ## Development
 
 ```sh
 npm install
-npm run release:prepare  # downloads the latest release into public/releases/ (~150 MB), use RELEASE_TAG=... for another one
+npm run release:prepare  # describes the latest release (assets downloaded into node_modules/.cache, ~150 MB), use RELEASE_TAG=... for another one
 npm run dev              # tutorial on http://localhost:5173/
 npm run dev:storybook    # all screens on http://localhost:6006/
 npm run test:unit
 ```
 
-To test the archive rewriting on a real file: `PENPOT_ARCHIVE_SAMPLE=/path/to/file.penpot npm run test:unit`.
+To test the manifest reading on a real file: `PENPOT_ARCHIVE_SAMPLE=/path/to/file.penpot npm run test:unit`.
 
 The progress is kept into the browser `localStorage` (key `penpot-dsfr-tutorial`), clear it to restart from scratch.
 
 ## Deployment
 
-The workflow `.github/workflows/tutorial.yml` builds the tutorial, its Storybook (`/storybook/`) and the documentation preview (`/documentation/`), then deploys them on GitHub Pages. It runs on changes and each time a release is published (to mirror the new files).
+The workflow `.github/workflows/tutorial.yml` runs the checks (supply chain, workflows lint, format, types, unit tests) and builds the tutorial, its Storybook (`/storybook/`) and the documentation preview (`/documentation/`) in parallel jobs. It then assembles them into a static website deployed on GitHub Pages (no server needed).
+
+- For now only the `new-attempt` branch is deployed. Pull requests run the checks and builds without deploying.
+- In the repository settings, the GitHub Pages source must be "GitHub Actions", and the `github-pages` environment must allow the deployed branch in its deployment branch rules (`Settings > Environments`).
+- After publishing a release, run the workflow manually (`Actions > Tutorial and documentation > Run workflow`, optionally with a release tag) so the tutorial proposes its `.penpot` files.
 
 The build uses relative paths, so it works both on `https://<organization>.github.io/<repository>/` and on a custom domain configured in the repository settings (`Settings > Pages > Custom domain`, no `CNAME` file is needed with GitHub Actions deployments).
 
@@ -43,13 +41,12 @@ The build uses relative paths, so it works both on `https://<organization>.githu
 
 ## Embedding
 
-The iframe needs a few permissions to let the tutorial download prepared files and copy addresses:
+The iframe needs a few permissions to let the tutorial open the release files (downloads) and Penpot in new tabs:
 
 ```html
 <iframe
   title="Installer le DSFR sur Penpot"
   src="https://<tutorial-domain>/"
-  allow="clipboard-write"
   sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms"
 ></iframe>
 ```

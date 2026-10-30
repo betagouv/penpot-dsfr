@@ -17,13 +17,13 @@ export function PrepareWorkspaceStep() {
           , puis décompressez l’archive.
         </li>
         <li>
-          Dans Penpot, depuis le tableau de bord de votre équipe, ouvrez la section <strong>Polices</strong> (<em>Fonts</em>) du panneau de gauche.
+          Dans Penpot, depuis le tableau de bord de votre équipe, ouvrez la section <strong>Polices</strong> du panneau de gauche.
         </li>
         <li>
-          Cliquez sur <strong>Ajouter une police personnalisée</strong> (<em>Add custom font</em>) et sélectionnez les 12 variantes.
+          Cliquez sur <strong>Ajouter une police personnalisée</strong> et sélectionnez les 12 variantes.
         </li>
         <li>
-          Une fois les variantes listées comme « en attente », cliquez sur <strong>Tout téléverser</strong> (<em>Upload all</em>).
+          Une fois les variantes listées comme « en attente », cliquez sur <strong>Tout téléverser</strong>.
         </li>
       </ol>
 
@@ -32,11 +32,27 @@ export function PrepareWorkspaceStep() {
         Dans la section <strong>Projets</strong>, créez un nouveau projet nommé par exemple <code>DSFR</code>. Il accueillera les fichiers que vous
         allez importer.
       </p>
-
       <Notice
-        className={fr.cx('fr-mt-4w')}
-        title="Toutes les personnes de votre équipe Penpot profiteront de cette installation, elle n’est à faire qu’une seule fois par équipe."
+        className={fr.cx('fr-mt-2w')}
+        title="La police, le projet et les fichiers du DSFR sont partagés par toute votre équipe Penpot : cette installation n’est à faire qu’une seule fois par équipe."
       />
+
+      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>3. Activer le nouveau moteur de rendu</h2>
+      <p>
+        Penpot propose un nouveau moteur de rendu, bien plus fluide sur les fichiers volumineux comme ceux du DSFR. Il est aussi nécessaire pour
+        afficher certains éléments correctement, par exemple les bordures d’un seul côté des champs de formulaire.
+      </p>
+      <ol>
+        <li>
+          Depuis le tableau de bord de votre instance Penpot, ouvrez le menu de votre profil en bas à gauche, puis <strong>Votre compte</strong>.
+        </li>
+        <li>
+          Allez dans <strong>Configuration</strong>, section <strong>Rendu WebGL</strong>, et activez-le.
+        </li>
+      </ol>
+      <p className={fr.cx('fr-text--sm')}>
+        Contrairement aux étapes précédentes, ce réglage est propre à chaque personne : invitez les membres de votre équipe à l’activer aussi.
+      </p>
     </>
   );
 }

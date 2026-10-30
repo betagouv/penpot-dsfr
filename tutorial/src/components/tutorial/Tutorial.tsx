@@ -1,10 +1,10 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { ButtonProps } from '@codegouvfr/react-dsfr/Button';
 import { ButtonsGroup } from '@codegouvfr/react-dsfr/ButtonsGroup';
 import { Stepper } from '@codegouvfr/react-dsfr/Stepper';
-import { ReactNode, useEffect, useMemo, useRef } from 'react';
+import { ReactNode, useMemo, useRef } from 'react';
 
-import { DsfrReadyStep } from '@tutorial/src/components/steps/DsfrReadyStep';
 import { EndStep } from '@tutorial/src/components/steps/EndStep';
 import { FigmaPluginStep } from '@tutorial/src/components/steps/FigmaPluginStep';
 import { ImportFileStep } from '@tutorial/src/components/steps/ImportFileStep';
@@ -16,21 +16,17 @@ import {
   TutorialState,
   getAvailableFileKeys,
   getFileKeyFromStepId,
-  getFilePatchPlan,
-  getLibraryFileIds,
   getPhases,
   getStepPhase,
   getStepTitle,
   getSteps,
   initialTutorialState,
+  isFirstStepAfterImports,
   toFileStepId,
 } from '@tutorial/src/components/tutorial/model';
-import { DsfrFileKey, dsfrFiles } from '@tutorial/src/config/dsfr-files';
+import { dsfrFiles } from '@tutorial/src/config/dsfr-files';
 import { Release, getDsfrVersion } from '@tutorial/src/config/release';
-import { linkLibrariesAtImport } from '@tutorial/src/config/tutorial';
-import { useArchivePreparation } from '@tutorial/src/hooks/useArchivePreparation';
 import { useLocalStorageState } from '@tutorial/src/hooks/useLocalStorageState';
-import { parsePenpotUrl } from '@tutorial/src/utils/penpot-url';
 
 export interface TutorialProps {
   release: Release;
@@ -41,7 +37,6 @@ export interface TutorialProps {
 
 export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initialState }: TutorialProps) {
   const [state, setState] = useLocalStorageState<TutorialState>(storageKey, { ...initialTutorialState, ...initialState });
-  const { preparation, prepare, reset } = useArchivePreparation();
   const titleRef = useRef<HTMLDivElement>(null);
 
   const availableFileKeys = useMemo(() => getAvailableFileKeys(release), [release]);
@@ -52,14 +47,9 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
   const stepIndex = steps.indexOf(stepId);
   const phases = getPhases(steps);
   const fileKey = getFileKeyFromStepId(stepId);
-  const libraryFileIds = getLibraryFileIds(state.libraryUrls);
-  const importedFileKeys = availableFileKeys.filter((key) => !!libraryFileIds[key]);
+  // Required files are always imported, optional ones only when selected
+  const importedFileKeys = availableFileKeys.filter((key) => !dsfrFiles[key].optional || state.optionalFiles.includes(key));
   const latestDsfrVersion = getDsfrVersion(release);
-
-  // The preparation is specific to a file step
-  useEffect(() => {
-    reset();
-  }, [stepId, reset]);
 
   const goTo = (nextStepId: StepId) => {
     setState((previousState) => ({ ...previousState, stepId: nextStepId }));
@@ -68,68 +58,28 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
     titleRef.current?.focus({ preventScroll: true });
   };
 
-  const setLibraryUrl = (key: DsfrFileKey, url: string) => {
-    setState((previousState) => ({ ...previousState, libraryUrls: { ...previousState.libraryUrls, [key]: url } }));
-  };
-
-  const getUrlWarning = (key: DsfrFileKey) => (fileId: string, teamId: string | null, origin: string) => {
-    for (const otherKey of availableFileKeys) {
-      if (otherKey === key) {
-        continue;
-      }
-
-      const otherResult = parsePenpotUrl(state.libraryUrls[otherKey] ?? '');
-      if (!otherResult.success) {
-        continue;
-      }
-
-      if (otherResult.fileId === fileId) {
-        return `Cette adresse est déjà celle du fichier « ${dsfrFiles[otherKey].label} », vérifiez que vous avez ouvert le bon fichier.`;
-      } else if (otherResult.origin !== origin || (otherResult.teamId && teamId && otherResult.teamId !== teamId)) {
-        return `Ce fichier ne semble pas être dans la même équipe Penpot que « ${dsfrFiles[otherKey].label} » : les bibliothèques ne pourront pas être reliées entre elles.`;
-      }
-    }
-
-    return null;
-  };
-
   let content: ReactNode;
   let canGoNext = true;
 
   if (fileKey) {
-    const releaseFile = release.files[fileKey]!;
-    const plan = getFilePatchPlan(fileKey, release, libraryFileIds);
-
-    canGoNext = !!libraryFileIds[fileKey];
     content = (
       <ImportFileStep
         file={dsfrFiles[fileKey]}
-        releaseFile={releaseFile}
-        plan={plan}
-        linkLibraries={linkLibrariesAtImport}
-        preparation={preparation}
-        onPrepare={() =>
-          prepare({
-            url: releaseFile.path,
-            fileName: releaseFile.assetName,
-            fileIdReplacements: plan.fileIdReplacements,
-            linkLibraries: linkLibrariesAtImport,
-          })
-        }
-        url={state.libraryUrls[fileKey] ?? ''}
-        onUrlChange={(url) => setLibraryUrl(fileKey, url)}
-        getUrlWarning={getUrlWarning(fileKey)}
+        releaseFile={release.files[fileKey]!}
+        previousFileKeys={availableFileKeys.slice(0, availableFileKeys.indexOf(fileKey)).filter((key) => importedFileKeys.includes(key))}
       />
     );
   } else {
     switch (stepId) {
       case 'welcome':
-        // When the version cannot be read from the release, there is nothing to compare with
-        canGoNext = !latestDsfrVersion || state.dsfrVersion === latestDsfrVersion;
+        // The version only matters for mockups to transfer, and an outdated one does not block (links can be fixed in Penpot)
+        canGoNext = state.hasFigmaFiles === false || (state.hasFigmaFiles === true && (!latestDsfrVersion || state.dsfrVersion !== null));
         content = (
           <WelcomeStep
             release={release}
             fileKeys={availableFileKeys}
+            hasFigmaFiles={state.hasFigmaFiles}
+            onHasFigmaFilesChange={(hasFigmaFiles) => setState((previousState) => ({ ...previousState, hasFigmaFiles }))}
             dsfrVersion={state.dsfrVersion}
             onDsfrVersionChange={(dsfrVersion) => setState((previousState) => ({ ...previousState, dsfrVersion }))}
           />
@@ -148,24 +98,14 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
           />
         );
         break;
-      case 'dsfr-ready':
-        canGoNext = state.hasFigmaFiles !== null;
-        content = (
-          <DsfrReadyStep
-            libraryUrls={state.libraryUrls}
-            importedFileKeys={importedFileKeys}
-            hasFigmaFiles={state.hasFigmaFiles}
-            onHasFigmaFilesChange={(hasFigmaFiles) => setState((previousState) => ({ ...previousState, hasFigmaFiles }))}
-          />
-        );
-        break;
       case 'figma':
         content = (
           <FigmaPluginStep
             release={release}
-            availableFileKeys={availableFileKeys}
-            libraryUrls={state.libraryUrls}
-            onLibraryUrlChange={setLibraryUrl}
+            latestDsfrVersion={latestDsfrVersion}
+            dsfrVersion={state.dsfrVersion}
+            importedFileKeys={importedFileKeys}
+            notImportedFileKeys={availableFileKeys.filter((key) => !importedFileKeys.includes(key))}
             onImportFile={(key) => {
               setState((previousState) => ({
                 ...previousState,
@@ -189,8 +129,7 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
           priority: 'secondary',
           iconId: 'fr-icon-refresh-line',
           onClick: () => {
-            // Addresses are kept since the libraries are still in the Penpot workspace
-            setState((previousState) => ({ ...initialTutorialState, libraryUrls: previousState.libraryUrls }));
+            setState(initialTutorialState);
             goTo('welcome');
           },
         }
@@ -224,11 +163,21 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
       </div>
       {/* The key resets the internal state of fields when switching from one file step to another */}
       <div key={stepId} className={fr.cx('fr-mb-4w')}>
+        {isFirstStepAfterImports(steps, stepId) && (
+          <Alert
+            severity="success"
+            small
+            className={fr.cx('fr-mb-4w')}
+            description="Bravo, le DSFR est installé : les membres de votre équipe peuvent dès à présent utiliser ses composants, couleurs et typographies."
+          />
+        )}
         {content}
       </div>
-      {!canGoNext && (fileKey || (stepId === 'welcome' && state.dsfrVersion === null)) && (
+      {!canGoNext && stepId === 'welcome' && (
         <p className={fr.cx('fr-text--sm')} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
-          {fileKey ? 'Indiquez l’adresse du fichier importé pour passer à l’étape suivante.' : 'Sélectionnez votre version du DSFR pour commencer.'}
+          {state.hasFigmaFiles === null
+            ? 'Indiquez si vous avez des maquettes Figma à transférer pour commencer.'
+            : 'Sélectionnez la version du DSFR de vos maquettes pour commencer.'}
         </p>
       )}
       <ButtonsGroup inlineLayoutWhen="sm and up" alignment="between" buttons={buttons} />

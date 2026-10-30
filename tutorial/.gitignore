@@ -2,6 +2,5 @@ node_modules
 dist
 *.local
 
-# assets copied or downloaded by scripts
+# assets copied by scripts
 public/dsfr
-public/releases

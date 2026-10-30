@@ -4,16 +4,11 @@ import { DsfrFileKey } from './dsfr-files';
 
 export interface ReleaseFile {
   assetName: string;
-  // Relative to the tutorial root, assets are mirrored next to the application since GitHub release downloads have no CORS headers
-  path: string;
-  // Direct download from GitHub, used as a fallback link
+  // Direct download from the GitHub release (a plain download needs no CORS headers, the file is not read by the tutorial)
   downloadUrl: string;
   size: number;
-  // File ID inside the `.penpot` archive (the one of our Penpot workspace, the one to be replaced)
-  fileId: string;
+  // Name of the file once imported into Penpot, also used by Penpot 2.19+ to link the libraries of the next imported files
   fileName: string;
-  // Other DSFR files whose IDs appear inside this file
-  references: DsfrFileKey[];
 }
 
 export interface Release {
@@ -27,7 +22,7 @@ export interface Release {
 
 export const release = releaseJson as Release;
 
-// Version of the DSFR the files were converted from (e.g. `1.14`), read from the file names since they follow the Figma ones
+// Version of the DSFR the files were converted from (e.g. `1.15`), read from the file names since they follow the Figma ones
 export function getDsfrVersion(release: Release): string | null {
   for (const file of Object.values(release.files)) {
     const match = file?.fileName.match(/\bv(\d+(?:\.\d+)+)/i);

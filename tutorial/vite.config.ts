@@ -11,9 +11,6 @@ export default defineConfig({
       '@tutorial': import.meta.dirname,
     },
   },
-  worker: {
-    format: 'es',
-  },
   test: {
     environment: 'node',
     include: ['src/**/*.spec.ts'],

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Tutorial } from '@tutorial/src/components/tutorial/Tutorial';
-import { releaseFixture, userLibraryUrlsFixture } from '@tutorial/src/fixtures/release';
+import { releaseFixture } from '@tutorial/src/fixtures/release';
 
 const meta = {
   title: 'Tutorial',
@@ -23,23 +23,21 @@ export const Start: Story = {
 export const ImportComposants: Story = {
   args: {
     storageKey: 'storybook-tutorial-import-composants',
-    initialState: {
-      stepId: 'file-composants',
-      libraryUrls: { pictogrammes: userLibraryUrlsFixture.pictogrammes, fondamentaux: userLibraryUrlsFixture.fondamentaux },
-    },
+    initialState: { stepId: 'file-composants' },
   },
 };
 
-export const DsfrReady: Story = {
+// The success message of the installation is displayed on the first step after the imports
+export const DsfrInstalled: Story = {
   args: {
-    storageKey: 'storybook-tutorial-dsfr-ready',
-    initialState: { stepId: 'dsfr-ready', libraryUrls: userLibraryUrlsFixture },
+    storageKey: 'storybook-tutorial-dsfr-installed',
+    initialState: { stepId: 'end', hasFigmaFiles: false },
   },
 };
 
 export const FigmaPlugin: Story = {
   args: {
     storageKey: 'storybook-tutorial-figma',
-    initialState: { stepId: 'figma', libraryUrls: userLibraryUrlsFixture, hasFigmaFiles: true },
+    initialState: { stepId: 'figma', hasFigmaFiles: true, dsfrVersion: '1.15' },
   },
 };

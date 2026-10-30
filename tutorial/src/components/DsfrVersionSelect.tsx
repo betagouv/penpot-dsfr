@@ -22,16 +22,14 @@ export function DsfrVersionSelect({ latestVersion, value, onChange }: DsfrVersio
   return (
     <>
       <Select
-        label="Quelle version du DSFR utilisez-vous ?"
-        hint={`Pour des maquettes Figma existantes, la version figure dans le nom des bibliothèques DSFR utilisées (onglet « Assets » > « Libraries »). Pour un nouveau projet, choisissez la dernière version.`}
-        state={isOutdated ? 'error' : 'default'}
-        stateRelatedMessage={isOutdated ? `Seule la version v${latestVersion} est disponible pour Penpot.` : undefined}
+        label="Quelle version du DSFR utilisent vos maquettes Figma ?"
+        hint="Elle figure dans le nom des bibliothèques DSFR utilisées par vos fichiers (onglet « Assets » puis « Libraries » dans Figma)."
         nativeSelectProps={{ value: value ?? '', onChange: (event) => onChange(event.currentTarget.value) }}
       >
         <option value="" disabled hidden>
           Sélectionnez une version
         </option>
-        <option value={latestVersion}>v{latestVersion} (dernière version)</option>
+        <option value={latestVersion}>v{latestVersion} (version installée dans Penpot)</option>
         {previousVersions.map((version) => (
           <option key={version} value={version}>
             v{version}
@@ -43,27 +41,27 @@ export function DsfrVersionSelect({ latestVersion, value, onChange }: DsfrVersio
       {isOutdated && (
         <Alert
           severity="warning"
-          title={`Mettez d’abord à jour vos maquettes vers la version v${latestVersion} dans Figma`}
+          title={`Vos maquettes n’utilisent pas la version v${latestVersion} installée dans Penpot`}
           className={fr.cx('fr-mb-4w')}
           description={
             <>
               <p>
-                Seule la dernière version du DSFR est convertie pour Penpot. Transférer des maquettes reposant sur une autre version les
-                déconnecterait du DSFR.
+                Une fois vos maquettes transférées, certains de leurs composants risquent de perdre leur lien avec le DSFR ou de s’afficher
+                différemment. Deux possibilités :
               </p>
-              <ol>
+              <ul>
                 <li>
-                  Suivez{' '}
+                  <strong>Idéalement</strong>, passez d’abord vos maquettes en version v{latestVersion} dans Figma en suivant{' '}
                   <a href={figmaLibraryUpdateGuideUrl} target="_blank" rel="noopener noreferrer">
-                    le guide officiel de mise à jour du DSFR sur Figma
-                  </a>{' '}
-                  pour passer vos bibliothèques DSFR en version v{latestVersion}, en conservant les liens entre elles (<em>Composants</em> s’appuie
-                  sur <em>Fondamentaux</em> et <em>Pictogrammes</em>).
+                    le guide officiel de mise à jour du DSFR
+                  </a>
+                  , puis revenez à ce parcours.
                 </li>
-                <li>Dans chacun de vos fichiers d’application, basculez sur ces bibliothèques à jour et acceptez la mise à jour des composants.</li>
-                <li>Vérifiez que vos maquettes s’affichent correctement.</li>
-              </ol>
-              <p className={fr.cx('fr-mb-0')}>Revenez ensuite à ce parcours et sélectionnez la version v{latestVersion}.</p>
+                <li>
+                  <strong>Sinon</strong>, continuez avec votre version actuelle : vérifiez vos maquettes une fois dans Penpot et ajustez à la main les
+                  éléments concernés, par exemple en échangeant un composant contre son équivalent du DSFR installé.
+                </li>
+              </ul>
             </>
           }
         />

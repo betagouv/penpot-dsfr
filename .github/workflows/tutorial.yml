@@ -1,96 +1,289 @@
 name: Tutorial and documentation
+
+# Checks run in parallel jobs, each build uploads its own artifact, and the last jobs assemble
+# them into one static website deployed on GitHub Pages:
+# - `/`: the interactive tutorial (the `.penpot` files are downloaded from the GitHub release directly)
+# - `/storybook/`: all screens of the tutorial
+# - `/documentation/`: preview of the page proposed to systeme-de-design.gouv.fr
+#
+# For now only the `new-attempt` branch is deployed (see the `pages` job condition). The GitHub
+# Pages source must be "GitHub Actions", and the `github-pages` environment must allow this
+# branch in its deployment branch rules (Settings > Environments).
+
 on:
   push:
     branches:
-      - main
+      - new-attempt
     paths:
       - 'tutorial/**'
       - 'documentation/**'
+      - '.github/actions/setup/**'
       - '.github/workflows/tutorial.yml'
   pull_request:
     paths:
       - 'tutorial/**'
       - 'documentation/**'
+      - '.github/actions/setup/**'
       - '.github/workflows/tutorial.yml'
-  # A new release means new `.penpot` files to mirror into the tutorial
-  release:
-    types: [published]
+  # To run after publishing a release, so the tutorial proposes its `.penpot` files
   workflow_dispatch:
     inputs:
       release_tag:
         description: 'Release tag to propose in the tutorial (latest one if empty)'
         required: false
-env:
-  NODE_VERSION: 24.14.0
+
+permissions: # Default permissions
+  contents: read
+
 concurrency:
+  # A new push supersedes the run in progress of the same branch
   group: tutorial-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24.14.0
+
 jobs:
-  build:
-    name: Build
+  supply-chain:
+    name: Supply chain
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        project: [tutorial, documentation]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          working-directory: ${{ matrix.project }}
+
+      - name: Registry signatures and provenance of everything installed
+        working-directory: ${{ matrix.project }}
+        run: npm audit signatures
+
+      - name: Known vulnerabilities
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm audit --omit=dev --audit-level=critical
+          npm audit --audit-level=high || true
+
+  workflows:
+    name: Lint the workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Lint the workflows themselves
+        uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+        with:
+          min-severity: medium
+          online-audits: ${{ !github.event.act }} # they need a token, and "act" has none
+          token: ${{ github.event.act && 'unused-offline' || github.token }} # the action always passes one and rejects an empty value
+          advanced-security: false # issues reported in the job, so not requiring `security-events: write` permission
+
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        project: [tutorial, documentation]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: |
-            tutorial/package-lock.json
-            documentation/package-lock.json
+          working-directory: ${{ matrix.project }}
 
-      - name: Install tutorial dependencies
+      - name: Format check
+        working-directory: ${{ matrix.project }}
+        run: npm run format:check
+
+      - name: Lint
+        if: ${{ matrix.project == 'tutorial' }} # the documentation has only markdown and a build script
+        working-directory: ${{ matrix.project }}
+        run: npm run lint
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          working-directory: tutorial
+
+      - name: Test unit
         working-directory: tutorial
-        run: npm ci
+        run: npm run test:unit
 
-      - name: Check tutorial
-        working-directory: tutorial
-        run: |
-          npm run format:check
-          npm run lint
-          npm run test:unit
+  build-tutorial:
+    name: Build the tutorial
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Mirror the release files
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          working-directory: tutorial
+
+      - name: Describe the release files # the tutorial links to them, but needs the name of each file once imported into Penpot
         working-directory: tutorial
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }} # only to avoid the API rate limit of anonymous calls
           RELEASE_REPOSITORY: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.event.inputs.release_tag || (github.event_name == 'release' && github.event.release.tag_name) || '' }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: npm run release:prepare
 
-      - name: Build tutorial and Storybook
+      - name: Build
         working-directory: tutorial
-        run: |
-          npm run build
-          npm run build:storybook
+        run: npm run build
 
-      - name: Build documentation preview
+      - name: Upload the build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tutorial
+          path: tutorial/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  build-storybook:
+    name: Build the Storybook
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          working-directory: tutorial
+
+      - name: Build
+        working-directory: tutorial
+        run: npm run build:storybook
+
+      - name: Upload the build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook
+          path: tutorial/dist/storybook
+          if-no-files-found: error
+          retention-days: 1
+
+  build-documentation:
+    name: Build the documentation preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          working-directory: documentation
+
+      - name: Build
         working-directory: documentation
         env:
-          # Make the preview modal target the tutorial deployed alongside
-          TUTORIAL_URL: ../../
-        run: |
-          npm ci
-          npm run format:check
-          npm run build
-          cp -r dist ../tutorial/dist/documentation
+          TUTORIAL_URL: ../../ # make the preview modal target the tutorial deployed alongside
+        run: npm run build
 
-      - name: Upload Pages artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload the build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          path: tutorial/dist
+          name: documentation
+          path: documentation/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  pages:
+    name: Assemble the website
+    needs: [supply-chain, workflows, verify, test, build-tutorial, build-storybook, build-documentation]
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/new-attempt' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Download the tutorial
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tutorial
+          path: site
+
+      - name: Download the Storybook
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: storybook
+          path: site/storybook
+
+      - name: Download the documentation preview
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: documentation
+          path: site/documentation
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
 
   deploy:
     name: Deploy to GitHub Pages
-    if: github.event_name != 'pull_request'
-    needs: build
+    needs: pages
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       pages: write
       id-token: write
@@ -100,4 +293,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

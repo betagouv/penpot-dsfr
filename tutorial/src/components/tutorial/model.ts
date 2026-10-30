@@ -1,22 +1,20 @@
 import { DsfrFileKey, dsfrFileKeys, dsfrFiles } from '@tutorial/src/config/dsfr-files';
 import { Release } from '@tutorial/src/config/release';
-import { parsePenpotUrl } from '@tutorial/src/utils/penpot-url';
 
 export type FileStepId = `file-${DsfrFileKey}`;
-export type StepId = 'welcome' | 'prepare' | 'optional-files' | 'dsfr-ready' | 'figma' | 'end' | FileStepId;
+export type StepId = 'welcome' | 'prepare' | 'optional-files' | 'figma' | 'end' | FileStepId;
 
 export interface TutorialState {
   stepId: StepId;
-  libraryUrls: Partial<Record<DsfrFileKey, string>>;
   optionalFiles: DsfrFileKey[];
+  // Asked first: starting from scratch needs no version check, transferring Figma mockups does
   hasFigmaFiles: boolean | null;
-  // Figma mockups must use the exact DSFR version converted for Penpot, otherwise their components cannot be bound
+  // DSFR version of the Figma mockups to transfer, components of another version than the converted one may lose their link
   dsfrVersion: string | null;
 }
 
 export const initialTutorialState: TutorialState = {
   stepId: 'welcome',
-  libraryUrls: {},
   optionalFiles: [],
   hasFigmaFiles: null,
   dsfrVersion: null,
@@ -47,51 +45,9 @@ export function getSteps(state: Pick<TutorialState, 'optionalFiles' | 'hasFigmaF
     ...requiredFileSteps,
     ...(optionalFileKeys.length > 0 ? (['optional-files'] as const) : []),
     ...optionalFileSteps,
-    'dsfr-ready',
     ...(state.hasFigmaFiles ? (['figma'] as const) : []),
     'end',
   ];
-}
-
-export function getLibraryFileIds(libraryUrls: TutorialState['libraryUrls']): Partial<Record<DsfrFileKey, string>> {
-  const fileIds: Partial<Record<DsfrFileKey, string>> = {};
-
-  for (const key of dsfrFileKeys) {
-    const url = libraryUrls[key];
-    const result = url ? parsePenpotUrl(url) : null;
-
-    if (result?.success) {
-      fileIds[key] = result.fileId;
-    }
-  }
-
-  return fileIds;
-}
-
-export interface FilePatchPlan {
-  fileIdReplacements: Record<string, string>;
-  // Libraries referenced by the file that are already in the user workspace
-  linkedReferences: DsfrFileKey[];
-  // Libraries referenced by the file but not imported yet by the user (their elements will not be bound)
-  missingReferences: DsfrFileKey[];
-}
-
-export function getFilePatchPlan(key: DsfrFileKey, release: Release, libraryFileIds: Partial<Record<DsfrFileKey, string>>): FilePatchPlan {
-  const plan: FilePatchPlan = { fileIdReplacements: {}, linkedReferences: [], missingReferences: [] };
-
-  for (const reference of release.files[key]?.references ?? []) {
-    const referencedFile = release.files[reference];
-    const userFileId = libraryFileIds[reference];
-
-    if (referencedFile && userFileId) {
-      plan.fileIdReplacements[referencedFile.fileId] = userFileId;
-      plan.linkedReferences.push(reference);
-    } else {
-      plan.missingReferences.push(reference);
-    }
-  }
-
-  return plan;
 }
 
 // The DSFR stepper only supports up to 8 steps, so it displays phases grouping the detailed steps
@@ -107,12 +63,19 @@ export function getStepPhase(stepId: StepId): string {
       return 'Préparation';
     case 'optional-files':
       return 'Compléments';
-    case 'dsfr-ready':
     case 'figma':
       return 'Maquettes existantes';
     default:
       return 'Conception';
   }
+}
+
+// Steps right after the DSFR files are imported, they display a success message
+export function isFirstStepAfterImports(steps: StepId[], stepId: StepId): boolean {
+  const index = steps.indexOf(stepId);
+  const previousStepId = index > 0 ? steps[index - 1] : null;
+
+  return !!previousStepId && (previousStepId === 'optional-files' || getFileKeyFromStepId(previousStepId) !== null) && !getFileKeyFromStepId(stepId);
 }
 
 export function getPhases(steps: StepId[]): string[] {
@@ -132,8 +95,6 @@ export function getStepTitle(stepId: StepId): string {
       return 'Préparer votre espace Penpot';
     case 'optional-files':
       return 'Fichiers complémentaires';
-    case 'dsfr-ready':
-      return 'Le DSFR est installé';
     case 'figma':
       return 'Transférer vos maquettes Figma';
     case 'end':

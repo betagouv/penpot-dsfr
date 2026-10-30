@@ -7,7 +7,7 @@ const config: StorybookConfig = {
     name: '@storybook/react-vite',
     options: {},
   },
-  // Serves the DSFR assets copied by `react-dsfr copy-static-assets` (not the whole `public` folder that contains heavy release files)
+  // Serves the DSFR assets copied by `react-dsfr copy-static-assets`
   staticDirs: [{ from: '../public/dsfr', to: '/dsfr' }],
   // The Vite configuration of the application would otherwise copy the whole `public` folder too
   viteFinal: (config) => ({ ...config, publicDir: false }),

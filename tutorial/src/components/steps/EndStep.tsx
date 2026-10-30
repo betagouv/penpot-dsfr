@@ -10,8 +10,7 @@ export function EndStep() {
       <ol>
         <li>Créez ou ouvrez le fichier de votre service dans Penpot.</li>
         <li>
-          Dans le panneau de gauche, ouvrez l’onglet <strong>Ressources</strong> (<em>Assets</em>) puis cliquez sur <strong>Bibliothèques</strong> (
-          <em>Libraries</em>).
+          Dans le panneau de gauche, ouvrez l’onglet <strong>Ressources</strong> puis cliquez sur <strong>Bibliothèques</strong>.
         </li>
         <li>
           Cliquez sur <strong>+</strong> en face des bibliothèques <em>Composants</em>, <em>Fondamentaux</em> et <em>Pictogrammes</em>.
@@ -29,12 +28,38 @@ export function EndStep() {
           plus fluide.
         </li>
         <li>
-          Certains éléments du thème sombre et certaines déclinaisons ont été retirés pour alléger les fichiers. Pour découvrir le DSFR en détail,
-          consultez{' '}
+          Pour modifier un texte d’un composant (le libellé d’un bouton…), double-cliquez dessus dans la maquette : Penpot n’a pas encore de champ de
+          texte dans le panneau des propriétés.
+        </li>
+        <li>
+          Pour changer l’icône d’un bouton, sélectionnez l’icône à l’intérieur du bouton (dans le panneau des calques), puis utilisez{' '}
+          <strong>Échanger composant</strong> dans le panneau de droite et choisissez une autre icône de <em>Fondamentaux</em>. Inutile de détacher le
+          bouton.
+        </li>
+      </ul>
+
+      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>Limites connues</h2>
+      <ul>
+        <li>
+          Pour rester fluide, le fichier <em>Composants</em> ne contient pas les planches d’exemples présentant chaque composant en contexte (desktop
+          et mobile). Il diffère donc du fichier Figma, mais tous les composants, en thème clair comme en thème sombre, sont présents. Pour découvrir
+          le DSFR en détail, consultez{' '}
           <a href={dsfrDocumentationUrl} target="_blank" rel="noopener noreferrer">
             la documentation du Système de Design de l’État
           </a>
           .
+        </li>
+        <li>
+          Certaines propriétés des composants Figma (afficher ou masquer un élément, modifier un texte) n’existent pas encore dans Penpot : seules les
+          variantes sont proposées.
+        </li>
+        <li>
+          Les textes peuvent parfois passer sur une ligne de plus que dans Figma, et Penpot ne sait pas encore tronquer un texte trop long avec des
+          points de suspension.
+        </li>
+        <li>
+          Le passage de vos fichiers à une nouvelle version du DSFR n’est pas encore simple : Penpot ne permet pas encore de remplacer facilement une
+          bibliothèque par une autre dans des fichiers existants. Cette étape reste à éprouver, elle sera documentée au fil des évolutions de Penpot.
         </li>
       </ul>
 

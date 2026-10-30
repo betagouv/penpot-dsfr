@@ -30,11 +30,10 @@ It is expected to render a button opening a DSFR modal (`fr-modal`) containing:
   src="https://betagouv.github.io/penpot-dsfr/"
   loading="lazy"
   style="width: 100%; height: 70vh; border: 0"
-  allow="clipboard-write"
   sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms"
 ></iframe>
 ```
 
-`allow-downloads` and `clipboard-write` are required: the tutorial prepares files in the browser for the user to download, and offers buttons to copy addresses. If the directive is not supported, a simple link to the tutorial is a working fallback (the tutorial also works as a standalone page).
+`allow-popups` and `allow-popups-to-escape-sandbox` are required: the tutorial opens the release files (downloads) and Penpot in new tabs, `allow-downloads` covers browsers handling the download from the iframe itself. If the directive is not supported, a simple link to the tutorial is a working fallback (the tutorial also works as a standalone page).
 
 The `src` must be updated once the final domain of the tutorial is chosen.

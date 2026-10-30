@@ -144,13 +144,12 @@ function remarkDsfrDocDirectives() {
                         ]),
                         h('div', { className: ['fr-modal__content'] }, [
                           h('h1', { id: `${modalId}-title`, className: ['fr-modal__title'] }, title),
-                          // `allow-downloads` and `clipboard-write` are needed by the tutorial (prepared files, copy buttons)
+                          // The tutorial opens the release files and Penpot in new tabs, they must escape the sandbox
                           h('iframe', {
                             title: title,
                             src: src,
                             loading: 'lazy',
                             style: 'width: 100%; height: 70vh; border: 0',
-                            allow: 'clipboard-write',
                             sandbox: 'allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms',
                           }),
                         ]),

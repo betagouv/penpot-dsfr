@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Release } from '@tutorial/src/config/release';
 
-import { getFilePatchPlan, getLibraryFileIds, getPhases, getSteps } from './model';
+import { getPhases, getSteps, isFirstStepAfterImports } from './model';
 
 const release: Release = {
   repository: 'betagouv/penpot-dsfr',
@@ -13,44 +13,30 @@ const release: Release = {
   files: {
     pictogrammes: {
       assetName: 'p.penpot',
-      path: 'releases/test/p.penpot',
       downloadUrl: '',
       size: 1,
-      fileId: '00000000-0000-0000-0000-00000000000a',
       fileName: 'P',
-      references: ['fondamentaux'],
     },
     fondamentaux: {
       assetName: 'f.penpot',
-      path: 'releases/test/f.penpot',
       downloadUrl: '',
       size: 1,
-      fileId: '00000000-0000-0000-0000-00000000000b',
       fileName: 'F',
-      references: ['pictogrammes'],
     },
     composants: {
       assetName: 'c.penpot',
-      path: 'releases/test/c.penpot',
       downloadUrl: '',
       size: 1,
-      fileId: '00000000-0000-0000-0000-00000000000c',
       fileName: 'C',
-      references: ['pictogrammes', 'fondamentaux'],
     },
     beta: {
       assetName: 'b.penpot',
-      path: 'releases/test/b.penpot',
       downloadUrl: '',
       size: 1,
-      fileId: '00000000-0000-0000-0000-00000000000d',
       fileName: 'B',
-      references: ['pictogrammes', 'fondamentaux', 'composants'],
     },
   },
 };
-
-const userUrl = (fileId: string) => `https://design.penpot.app/#/workspace?team-id=3d04e89b-bff0-8115-8004-bc137de720b4&file-id=${fileId}`;
 
 describe('getSteps()', () => {
   it('should only include available and selected files', () => {
@@ -61,7 +47,6 @@ describe('getSteps()', () => {
       'file-fondamentaux',
       'file-composants',
       'optional-files',
-      'dsfr-ready',
       'end',
     ]);
 
@@ -73,7 +58,6 @@ describe('getSteps()', () => {
       'file-composants',
       'optional-files',
       'file-beta',
-      'dsfr-ready',
       'figma',
       'end',
     ]);
@@ -85,6 +69,9 @@ describe('getPhases()', () => {
     const steps = getSteps({ optionalFiles: ['modeles', 'beta'], hasFigmaFiles: true }, release);
 
     expect(steps.length).toBeGreaterThan(8);
+    expect(isFirstStepAfterImports(steps, 'figma')).toBe(true);
+    expect(isFirstStepAfterImports(steps, 'end')).toBe(false);
+    expect(isFirstStepAfterImports(steps, 'file-beta')).toBe(false);
     expect(getPhases(steps)).toStrictEqual([
       'Préparation',
       'Pictogrammes',
@@ -94,37 +81,5 @@ describe('getPhases()', () => {
       'Maquettes existantes',
       'Conception',
     ]);
-  });
-});
-
-describe('getFilePatchPlan()', () => {
-  const libraryFileIds = getLibraryFileIds({
-    pictogrammes: userUrl('10000000-0000-0000-0000-00000000000a'),
-    fondamentaux: userUrl('10000000-0000-0000-0000-00000000000b'),
-    composants: 'not an url',
-  });
-
-  it('should only replace imported libraries', () => {
-    expect(libraryFileIds).toStrictEqual({
-      pictogrammes: '10000000-0000-0000-0000-00000000000a',
-      fondamentaux: '10000000-0000-0000-0000-00000000000b',
-    });
-
-    expect(getFilePatchPlan('beta', release, libraryFileIds)).toStrictEqual({
-      fileIdReplacements: {
-        '00000000-0000-0000-0000-00000000000a': '10000000-0000-0000-0000-00000000000a',
-        '00000000-0000-0000-0000-00000000000b': '10000000-0000-0000-0000-00000000000b',
-      },
-      linkedReferences: ['pictogrammes', 'fondamentaux'],
-      missingReferences: ['composants'],
-    });
-  });
-
-  it('should report circular references not imported yet', () => {
-    expect(getFilePatchPlan('pictogrammes', release, {})).toStrictEqual({
-      fileIdReplacements: {},
-      linkedReferences: [],
-      missingReferences: ['fondamentaux'],
-    });
   });
 });
