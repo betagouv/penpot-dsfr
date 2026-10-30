@@ -28,6 +28,30 @@ const outputDirectory = path.resolve(rootDirectory, 'dist');
 const dsfrDirectory = path.resolve(rootDirectory, 'node_modules/@gouvfr/dsfr/dist');
 const tutorialUrl = process.env.TUTORIAL_URL;
 
+// The DSFR keeps 10% of the screen above and under a modal from the md breakpoint (`::before` and `::after` spacers, so not
+// overridable inline) and 4rem under its content. The tutorial is long and used for a while, it gets the whole screen height
+// as on mobile, the iframe filling the modal body without a second scrollbar (header and bottom space subtracted)
+const iframeModalCss = `
+.dsfr-doc-iframe-modal::before,
+.dsfr-doc-iframe-modal::after {
+  height: 1rem;
+  flex-basis: 1rem;
+}
+.dsfr-doc-iframe-modal .fr-modal__body {
+  max-height: calc(100vh - 2rem);
+}
+.dsfr-doc-iframe-modal .fr-modal__content {
+  margin-bottom: 1.5rem;
+}
+.dsfr-doc-iframe-modal iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 8rem);
+  min-height: 20rem;
+  border: 0;
+}
+`;
+
 function findPages(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const entryPath = path.join(directory, entry.name);
@@ -118,6 +142,7 @@ function remarkDsfrDocDirectives() {
           node.data = {
             hName: 'div',
             hChildren: [
+              ...(modalCounter === 1 ? [h('style', iframeModalCss)] : []),
               h('p', [
                 h(
                   'button',
@@ -130,10 +155,11 @@ function remarkDsfrDocDirectives() {
                   label.map((child) => child.value ?? '').join('')
                 ),
               ]),
-              h('dialog', { id: modalId, className: ['fr-modal'], role: 'dialog', 'aria-labelledby': `${modalId}-title` }, [
+              h('dialog', { id: modalId, className: ['fr-modal', 'dsfr-doc-iframe-modal'], role: 'dialog', 'aria-labelledby': `${modalId}-title` }, [
                 h('div', { className: ['fr-container', 'fr-container--fluid', 'fr-container-md'] }, [
                   h('div', { className: ['fr-grid-row', 'fr-grid-row--center'] }, [
-                    h('div', { className: ['fr-col-12', 'fr-col-lg-10'] }, [
+                    // The whole container width, the tutorial is long and used for a while
+                    h('div', { className: ['fr-col-12'] }, [
                       h('div', { className: ['fr-modal__body'] }, [
                         h('div', { className: ['fr-modal__header'] }, [
                           h(
@@ -143,13 +169,13 @@ function remarkDsfrDocDirectives() {
                           ),
                         ]),
                         h('div', { className: ['fr-modal__content'] }, [
-                          h('h1', { id: `${modalId}-title`, className: ['fr-modal__title'] }, title),
+                          // Only for screen readers, the tutorial displays its own title and the space goes to it
+                          h('h1', { id: `${modalId}-title`, className: ['fr-modal__title', 'fr-sr-only'] }, title),
                           // The tutorial opens the release files and Penpot in new tabs, they must escape the sandbox
                           h('iframe', {
                             title: title,
                             src: src,
                             loading: 'lazy',
-                            style: 'width: 100%; height: 70vh; border: 0',
                             sandbox: 'allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms',
                           }),
                         ]),

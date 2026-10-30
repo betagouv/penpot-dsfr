@@ -25,7 +25,7 @@ Penpot est un outil de conception et de prototypage d’interfaces, alternative 
 
 - **Libre et open source** : son code est publié sous licence [MPL 2.0](https://github.com/penpot/penpot), développé par l’entreprise Kaleidos et une communauté de contributeurs.
 - **Dans le navigateur** : aucune installation n’est nécessaire sur votre poste, et plusieurs personnes peuvent travailler en même temps sur un fichier.
-- **Installable par votre administration** : Penpot peut être [auto-hébergé](https://help.penpot.app/technical-guide/getting-started/) sur vos serveurs, voire sur un poste isolé, pour que les maquettes ne quittent jamais votre infrastructure.
+- **Installable par votre administration** : Penpot peut être [auto-hébergé](https://help.penpot.app/technical-guide/getting-started/) sur les serveurs de votre administration, pour que les maquettes ne quittent jamais votre infrastructure.
 - **Proche du code** : Penpot décrit les éléments avec les standards du web (SVG, CSS) et affiche le code correspondant, ce qui facilite le passage aux équipes de développement.
 
 ## Pourquoi utiliser Penpot ?
@@ -109,6 +109,8 @@ Un projet qui démarre directement sur Penpot n’est pas concerné : il utilise
 ![Le plugin Penpot Exporter dans Figma, avec l’adresse Penpot de chaque bibliothèque DSFR renseignée dans la section External Libraries](./_asset/figma_plugin_libraries.png)
 
 Avant l’export, vérifiez dans le panneau **Bibliothèques** de Figma qu’aucune bibliothèque n’est manquante ou d’une autre version. Pour les fichiers volumineux, préférez l’application Figma pour ordinateur et n’exportez que les pages utiles.
+
+Si vos maquettes utilisent aussi vos propres bibliothèques Figma (composants maison, fichiers partagés par une autre équipe…), elles apparaissent également dans la section **External Libraries** du plugin. Pour conserver le lien, elles doivent déjà être dans votre espace Penpot : transférez vos fichiers dans le même ordre que ceux du DSFR, en commençant par ceux qui n’utilisent aucune autre de vos bibliothèques, ajoutez-les en tant que bibliothèques partagées une fois importés, puis passez aux fichiers qui les utilisent, jusqu’à vos maquettes finales.
 
 Le parcours interactif vous demande la version de vos maquettes dès le début et vous rappelle ces vérifications.
 

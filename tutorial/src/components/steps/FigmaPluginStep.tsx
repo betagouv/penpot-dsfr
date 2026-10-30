@@ -119,6 +119,27 @@ export function FigmaPluginStep({
         Comme pour les fichiers DSFR, importez le fichier <code>.penpot</code> obtenu dans le projet de votre choix. Les composants DSFR qu’il
         contient pointeront vers vos bibliothèques.
       </p>
+
+      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>Vos maquettes utilisent d’autres de vos fichiers Figma ?</h2>
+      <p>
+        Si votre fichier utilise aussi vos propres bibliothèques Figma (composants maison, maquettes partagées par une autre équipe…), elles
+        apparaissent elles aussi dans la section <strong>External Libraries</strong> du plugin. Pour que le lien soit conservé, ces bibliothèques
+        doivent déjà se trouver dans votre espace Penpot : transférez donc vos fichiers dans le même ordre que ceux du DSFR, en commençant par ceux
+        dont les autres dépendent.
+      </p>
+      <ol>
+        <li>
+          Commencez par les fichiers qui n’utilisent aucune autre de vos bibliothèques, seulement le DSFR : par exemple votre bibliothèque de
+          composants maison.
+        </li>
+        <li>
+          Une fois chacun importé dans Penpot, faites un clic droit dessus et choisissez <strong>Ajouter en tant que bibliothèque partagée</strong>.
+        </li>
+        <li>
+          Passez ensuite aux fichiers qui les utilisent, en collant dans le plugin l’adresse Penpot de ces bibliothèques comme pour celles du DSFR, et
+          ainsi de suite jusqu’à vos maquettes finales.
+        </li>
+      </ol>
       {isOutdated && (
         <Notice
           className={fr.cx('fr-mb-2w')}
