@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Release } from '@tutorial/src/config/release';
 
-import { getPhases, getSteps, isFirstStepAfterImports } from './model';
+import { getPhases, getStepAfterSituation, getSteps, isFirstStepAfterImports } from './model';
 
 const release: Release = {
   repository: 'betagouv/penpot-dsfr',
@@ -61,6 +61,17 @@ describe('getSteps()', () => {
       'figma',
       'end',
     ]);
+  });
+});
+
+describe('getStepAfterSituation()', () => {
+  it('should lead to the transfer only with mockups', () => {
+    expect(getStepAfterSituation({ hasFigmaFiles: true })).toBe('figma');
+    expect(getStepAfterSituation({ hasFigmaFiles: false })).toBe('end');
+  });
+
+  it('should be a detour outside of the progress', () => {
+    expect(getSteps({ optionalFiles: [], hasFigmaFiles: true }, release)).not.toContain('situation');
   });
 });
 

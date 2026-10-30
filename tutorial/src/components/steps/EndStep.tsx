@@ -1,9 +1,15 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { Button } from '@codegouvfr/react-dsfr/Button';
 import { CallOut } from '@codegouvfr/react-dsfr/CallOut';
 
 import { dsfrDocumentationUrl, supportEmail } from '@tutorial/src/config/tutorial';
 
-export function EndStep() {
+export interface EndStepProps {
+  hasFigmaFiles: boolean | null;
+  onChangeSituation: () => void;
+}
+
+export function EndStep({ hasFigmaFiles, onChangeSituation }: EndStepProps) {
   return (
     <>
       <h2 className={fr.cx('fr-h4')}>Utiliser le DSFR dans un nouveau fichier</h2>
@@ -62,6 +68,17 @@ export function EndStep() {
           bibliothèque par une autre dans des fichiers existants. Cette étape reste à éprouver, elle sera documentée au fil des évolutions de Penpot.
         </li>
       </ul>
+
+      {/* With mockups to transfer, their step is right before this one */}
+      {!hasFigmaFiles && (
+        <>
+          <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>Finalement, des maquettes Figma à transférer ?</h2>
+          <p>Le DSFR étant déjà installé, il suffit de modifier votre situation pour passer directement au transfert de vos maquettes.</p>
+          <Button priority="secondary" iconId="fr-icon-edit-line" className={fr.cx('fr-mb-4w')} onClick={onChangeSituation}>
+            Modifier votre situation
+          </Button>
+        </>
+      )}
 
       <CallOut title="Une question, un problème ?" iconId="fr-icon-chat-3-line" titleAs="h2">
         Écrivez-nous à <a href={`mailto:${supportEmail}`}>{supportEmail}</a>, vos retours nous aident à améliorer cette expérimentation.

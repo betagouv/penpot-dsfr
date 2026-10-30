@@ -1,4 +1,4 @@
-name: Tutorial and documentation
+name: Documentation
 
 # Checks run in parallel jobs, each build uploads its own artifact, and the last jobs assemble
 # them into one static website deployed on GitHub Pages:
@@ -18,13 +18,13 @@ on:
       - 'tutorial/**'
       - 'documentation/**'
       - '.github/actions/setup/**'
-      - '.github/workflows/tutorial.yml'
+      - '.github/workflows/documentation.yml'
   pull_request:
     paths:
       - 'tutorial/**'
       - 'documentation/**'
       - '.github/actions/setup/**'
-      - '.github/workflows/tutorial.yml'
+      - '.github/workflows/documentation.yml'
   # To run after publishing a release, so the tutorial proposes its `.penpot` files
   workflow_dispatch:
     inputs:
@@ -37,7 +37,7 @@ permissions: # Default permissions
 
 concurrency:
   # A new push supersedes the run in progress of the same branch
-  group: tutorial-${{ github.ref }}
+  group: documentation-${{ github.ref }}
   cancel-in-progress: true
 
 env:

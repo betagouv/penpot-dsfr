@@ -28,7 +28,7 @@ The progress is kept into the browser `localStorage` (key `penpot-dsfr-tutorial`
 
 ## Deployment
 
-The workflow `.github/workflows/tutorial.yml` runs the checks (supply chain, workflows lint, format, types, unit tests) and builds the tutorial, its Storybook (`/storybook/`) and the documentation preview (`/documentation/`) in parallel jobs. It then assembles them into a static website deployed on GitHub Pages (no server needed).
+The workflow `.github/workflows/documentation.yml` runs the checks (supply chain, workflows lint, format, types, unit tests) and builds the tutorial, its Storybook (`/storybook/`) and the documentation preview (`/documentation/`) in parallel jobs. It then assembles them into a static website deployed on GitHub Pages (no server needed).
 
 - For now only the `new-attempt` branch is deployed. Pull requests run the checks and builds without deploying.
 - In the repository settings, the GitHub Pages source must be "GitHub Actions", and the `github-pages` environment must allow the deployed branch in its deployment branch rules (`Settings > Environments`).

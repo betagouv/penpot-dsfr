@@ -1,8 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { CallOut } from '@codegouvfr/react-dsfr/CallOut';
-import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 
-import { DsfrVersionSelect } from '@tutorial/src/components/DsfrVersionSelect';
+import { SituationFields } from '@tutorial/src/components/SituationFields';
 import { DsfrFileKey, dsfrFiles } from '@tutorial/src/config/dsfr-files';
 import { Release, getDsfrVersion } from '@tutorial/src/config/release';
 import { minimumPenpotVersion, penpotSaasUrl, penpotSigUrl, penpotUrl } from '@tutorial/src/config/tutorial';
@@ -91,23 +90,13 @@ export function WelcomeStep({ release, fileKeys, hasFigmaFiles, onHasFigmaFilesC
       </CallOut>
 
       <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>Votre situation</h2>
-      <RadioButtons
-        legend="Avez-vous des maquettes Figma à transférer vers Penpot ?"
-        hintText="Par exemple les maquettes d’un service existant conçues avec les bibliothèques DSFR de Figma. Le transfert se fait à la fin du parcours, une fois le DSFR installé."
-        options={[
-          {
-            label: 'Non, je pars de zéro',
-            nativeInputProps: { checked: hasFigmaFiles === false, onChange: () => onHasFigmaFilesChange(false) },
-          },
-          {
-            label: 'Oui, je veux transférer des maquettes Figma',
-            nativeInputProps: { checked: hasFigmaFiles === true, onChange: () => onHasFigmaFilesChange(true) },
-          },
-        ]}
+      <SituationFields
+        latestDsfrVersion={latestDsfrVersion}
+        hasFigmaFiles={hasFigmaFiles}
+        onHasFigmaFilesChange={onHasFigmaFilesChange}
+        dsfrVersion={dsfrVersion}
+        onDsfrVersionChange={onDsfrVersionChange}
       />
-      {hasFigmaFiles && latestDsfrVersion && (
-        <DsfrVersionSelect latestVersion={latestDsfrVersion} value={dsfrVersion} onChange={onDsfrVersionChange} />
-      )}
 
       <p className={fr.cx('fr-text--sm')} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
         Version proposée :{' '}

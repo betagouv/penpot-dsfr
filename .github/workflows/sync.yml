@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Sync the DSFR files
 on:
   # TODO: enable this once Penpot SaaS has been patched for `figpot` to work
   # schedule:
@@ -12,7 +12,7 @@ env:
   FIGPOT: npx --yes @betagouv/figpot@^2
 concurrency:
   # Prevent parallel builds of the same branch
-  group: cicd-${{ github.ref }}
+  group: sync-${{ github.ref }}
   cancel-in-progress: false
 jobs:
   requirements:
@@ -21,22 +21,22 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout # zizmor: ignore[artipacked] the credentials are kept to commit the mappings back (`--sync-mapping-with-git`)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Export npm store directory as an environment variable
         shell: bash
         run: |
-          echo "STORE_PATH=$(npm config get cache)" >> $GITHUB_ENV
+          echo "STORE_PATH=$(npm config get cache)" >> "$GITHUB_ENV"
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         name: Setup npm cache
         with:
           path: ${{ env.STORE_PATH }}
@@ -44,7 +44,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-store-
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         name: Setup figpot medias cache
         with:
           path: data/medias

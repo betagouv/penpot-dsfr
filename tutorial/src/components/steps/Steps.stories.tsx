@@ -6,6 +6,7 @@ import { FigmaPluginStep } from '@tutorial/src/components/steps/FigmaPluginStep'
 import { ImportFileStep } from '@tutorial/src/components/steps/ImportFileStep';
 import { OptionalFilesStep } from '@tutorial/src/components/steps/OptionalFilesStep';
 import { PrepareWorkspaceStep } from '@tutorial/src/components/steps/PrepareWorkspaceStep';
+import { SituationStep } from '@tutorial/src/components/steps/SituationStep';
 import { WelcomeStep } from '@tutorial/src/components/steps/WelcomeStep';
 import { dsfrFiles } from '@tutorial/src/config/dsfr-files';
 import { releaseFixture } from '@tutorial/src/fixtures/release';
@@ -41,6 +42,12 @@ export const WelcomeOutdatedVersion: Story = {
       dsfrVersion="1.12"
       onDsfrVersionChange={fn()}
     />
+  ),
+};
+
+export const Situation: Story = {
+  render: () => (
+    <SituationStep latestDsfrVersion="1.15" hasFigmaFiles={true} onHasFigmaFilesChange={fn()} dsfrVersion={null} onDsfrVersionChange={fn()} />
   ),
 };
 
@@ -99,5 +106,5 @@ export const FigmaPluginOutdatedVersion: Story = {
 };
 
 export const End: Story = {
-  render: () => <EndStep />,
+  render: () => <EndStep hasFigmaFiles={false} onChangeSituation={fn()} />,
 };

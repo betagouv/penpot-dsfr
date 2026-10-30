@@ -33,14 +33,14 @@ On Figma, `Pictogrammes` and `Fondamentaux` use each other. To allow importing t
 
 ## Repository layout
 
-| Path                                                               | Content                                                                                                 |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| [`scripts/synchronize.sh`](scripts/synchronize.sh)                 | figpot parameters of each DSFR file (Figma and Penpot identifiers, libraries, exclusions)               |
-| [`data/`](data/)                                                   | figpot data: mappings between Figma and Penpot elements (`documents/`), cached Figma images (`medias/`) |
-| [`tutorial/`](tutorial/)                                           | Interactive tutorial installing the DSFR into a Penpot team (static website)                            |
-| [`documentation/`](documentation/)                                 | Page written for https://www.systeme-de-design.gouv.fr/, with a local preview                           |
-| [`.github/workflows/ci.yml`](.github/workflows/ci.yml)             | Synchronization of the DSFR files (manual trigger)                                                      |
-| [`.github/workflows/tutorial.yml`](.github/workflows/tutorial.yml) | Checks, builds and GitHub Pages deployment of the tutorial and the documentation preview                |
+| Path                                                                         | Content                                                                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [`scripts/synchronize.sh`](scripts/synchronize.sh)                           | figpot parameters of each DSFR file (Figma and Penpot identifiers, libraries, exclusions)               |
+| [`data/`](data/)                                                             | figpot data: mappings between Figma and Penpot elements (`documents/`), cached Figma images (`medias/`) |
+| [`tutorial/`](tutorial/)                                                     | Interactive tutorial installing the DSFR into a Penpot team (static website)                            |
+| [`documentation/`](documentation/)                                           | Page written for https://www.systeme-de-design.gouv.fr/, with a local preview                           |
+| [`.github/workflows/sync.yml`](.github/workflows/sync.yml)                   | Synchronization of the DSFR files (manual trigger)                                                      |
+| [`.github/workflows/documentation.yml`](.github/workflows/documentation.yml) | Checks, builds and GitHub Pages deployment of the tutorial and the documentation preview                |
 
 ## Using the DSFR on Penpot
 
@@ -100,8 +100,8 @@ Then run the `Tutorial and documentation` workflow manually (optionally with the
 
 ### Continuous integration
 
-- `.github/workflows/ci.yml` synchronizes all the files. It is triggered manually and needs the repository secrets `FIGMA_ACCESS_TOKEN`, `PENPOT_ACCESS_TOKEN`, `PENPOT_USER_EMAIL` and `PENPOT_USER_PASSWORD` (not environment ones). The mappings are committed back into `data/` (`--sync-mapping-with-git`)
-- `.github/workflows/tutorial.yml` checks and builds the tutorial, its Storybook and the documentation preview in parallel jobs, then deploys them as a static website on GitHub Pages (see [`tutorial/README.md`](tutorial/README.md#deployment))
+- `.github/workflows/sync.yml` synchronizes all the files. It is triggered manually and needs the repository secrets `FIGMA_ACCESS_TOKEN`, `PENPOT_ACCESS_TOKEN`, `PENPOT_USER_EMAIL` and `PENPOT_USER_PASSWORD` (not environment ones). The mappings are committed back into `data/` (`--sync-mapping-with-git`)
+- `.github/workflows/documentation.yml` checks and builds the tutorial, its Storybook and the documentation preview in parallel jobs, then deploys them as a static website on GitHub Pages (see [`tutorial/README.md`](tutorial/README.md#deployment))
 
 ## Frequently Asked Questions
 
@@ -149,11 +149,11 @@ _Temporary section listing what remains to be done, to be cleaned up once addres
 - [ ] Prototyping interactions (flows) are not transferred
 - [ ] Cache parsed SVG commands (performance)
 - [x] Thumbnails management removed, hydration forces the new render engine (`&wasm=true`) with a software WebGL fallback for CI
-- [ ] Publish figpot v2 on npm (`scripts/synchronize.sh` and `ci.yml` use `@betagouv/figpot@^2`, a local checkout is needed until then)
+- [ ] Publish figpot v2 on npm (`scripts/synchronize.sh` and `sync.yml` use `@betagouv/figpot@^2`, a local checkout is needed until then)
 
 ### Documentation and tutorial
 
-- [ ] GitHub Pages: set the source to "GitHub Actions" and allow the `new-attempt` branch in the `github-pages` environment, then switch the deployed branch to `main` once merged (`.github/workflows/tutorial.yml`)
+- [ ] GitHub Pages: set the source to "GitHub Actions" and allow the `new-attempt` branch in the `github-pages` environment, then switch the deployed branch to `main` once merged (`.github/workflows/documentation.yml`)
 - [ ] Set the final `.gouv.fr` domain of the tutorial (DSFR terms of use) and update the iframe `src` in `documentation/`
 - [ ] Link the exact official SIG guide to update DSFR libraries in Figma (`figmaLibraryUpdateGuideUrl` in `tutorial/src/config/tutorial.ts`)
 - [ ] Document `PENPOT_BASE_URL=https://penpot.systeme-de-design.gouv.fr` for those synchronizing on the SIG instance (it must be kept up to date by the SIG)

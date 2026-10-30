@@ -2,7 +2,8 @@ import { DsfrFileKey, dsfrFileKeys, dsfrFiles } from '@tutorial/src/config/dsfr-
 import { Release } from '@tutorial/src/config/release';
 
 export type FileStepId = `file-${DsfrFileKey}`;
-export type StepId = 'welcome' | 'prepare' | 'optional-files' | 'figma' | 'end' | FileStepId;
+// `situation` is a detour from the last step to change the answer given at the start, so it is not part of the progress
+export type StepId = 'welcome' | 'prepare' | 'optional-files' | 'figma' | 'end' | 'situation' | FileStepId;
 
 export interface TutorialState {
   stepId: StepId;
@@ -48,6 +49,11 @@ export function getSteps(state: Pick<TutorialState, 'optionalFiles' | 'hasFigmaF
     ...(state.hasFigmaFiles ? (['figma'] as const) : []),
     'end',
   ];
+}
+
+// Where the detour leads once the answer is changed, the DSFR is already installed
+export function getStepAfterSituation(state: Pick<TutorialState, 'hasFigmaFiles'>): StepId {
+  return state.hasFigmaFiles ? 'figma' : 'end';
 }
 
 // The DSFR stepper only supports up to 8 steps, so it displays phases grouping the detailed steps
@@ -99,6 +105,8 @@ export function getStepTitle(stepId: StepId): string {
       return 'Transférer vos maquettes Figma';
     case 'end':
       return 'Commencer à concevoir';
+    case 'situation':
+      return 'Modifier votre situation';
     default:
       return '';
   }

@@ -10,6 +10,7 @@ import { FigmaPluginStep } from '@tutorial/src/components/steps/FigmaPluginStep'
 import { ImportFileStep } from '@tutorial/src/components/steps/ImportFileStep';
 import { OptionalFilesStep } from '@tutorial/src/components/steps/OptionalFilesStep';
 import { PrepareWorkspaceStep } from '@tutorial/src/components/steps/PrepareWorkspaceStep';
+import { SituationStep } from '@tutorial/src/components/steps/SituationStep';
 import { WelcomeStep } from '@tutorial/src/components/steps/WelcomeStep';
 import {
   StepId,
@@ -17,6 +18,7 @@ import {
   getAvailableFileKeys,
   getFileKeyFromStepId,
   getPhases,
+  getStepAfterSituation,
   getStepPhase,
   getStepTitle,
   getSteps,
@@ -43,7 +45,7 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
   const optionalFileKeys = availableFileKeys.filter((key) => dsfrFiles[key].optional);
   const steps = getSteps(state, release);
   // A stored step may not exist anymore (new release without a file...)
-  const stepId: StepId = steps.includes(state.stepId) ? state.stepId : steps[0];
+  const stepId: StepId = state.stepId === 'situation' || steps.includes(state.stepId) ? state.stepId : steps[0];
   const stepIndex = steps.indexOf(stepId);
   const phases = getPhases(steps);
   const fileKey = getFileKeyFromStepId(stepId);
@@ -59,7 +61,9 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
   };
 
   let content: ReactNode;
-  let canGoNext = true;
+  // The version only matters for mockups to transfer, and an outdated one does not block (links can be fixed in Penpot)
+  const isSituationComplete = state.hasFigmaFiles === false || (state.hasFigmaFiles === true && (!latestDsfrVersion || state.dsfrVersion !== null));
+  const canGoNext = stepId !== 'welcome' && stepId !== 'situation' ? true : isSituationComplete;
 
   if (fileKey) {
     content = (
@@ -72,8 +76,6 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
   } else {
     switch (stepId) {
       case 'welcome':
-        // The version only matters for mockups to transfer, and an outdated one does not block (links can be fixed in Penpot)
-        canGoNext = state.hasFigmaFiles === false || (state.hasFigmaFiles === true && (!latestDsfrVersion || state.dsfrVersion !== null));
         content = (
           <WelcomeStep
             release={release}
@@ -116,49 +118,81 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
           />
         );
         break;
+      case 'situation':
+        content = (
+          <SituationStep
+            latestDsfrVersion={latestDsfrVersion}
+            hasFigmaFiles={state.hasFigmaFiles}
+            onHasFigmaFilesChange={(hasFigmaFiles) => setState((previousState) => ({ ...previousState, hasFigmaFiles }))}
+            dsfrVersion={state.dsfrVersion}
+            onDsfrVersionChange={(dsfrVersion) => setState((previousState) => ({ ...previousState, dsfrVersion }))}
+          />
+        );
+        break;
       default:
-        content = <EndStep />;
+        content = <EndStep hasFigmaFiles={state.hasFigmaFiles} onChangeSituation={() => goTo('situation')} />;
     }
   }
 
   const isLastStep = stepIndex === steps.length - 1;
-  const buttons: [ButtonProps, ...ButtonProps[]] = [
-    isLastStep
-      ? {
-          children: 'Recommencer le parcours',
-          priority: 'secondary',
-          iconId: 'fr-icon-refresh-line',
-          onClick: () => {
-            setState(initialTutorialState);
-            goTo('welcome');
-          },
-        }
-      : {
-          children: stepId === 'welcome' ? 'Commencer' : 'Étape suivante',
-          iconId: 'fr-icon-arrow-right-line',
-          iconPosition: 'right',
-          disabled: !canGoNext,
-          onClick: () => goTo(steps[stepIndex + 1]),
-        },
-  ];
+  let buttons: [ButtonProps, ...ButtonProps[]];
 
-  if (stepIndex > 0) {
-    buttons.unshift({
-      children: 'Étape précédente',
-      priority: 'secondary',
-      iconId: 'fr-icon-arrow-left-line',
-      onClick: () => goTo(steps[stepIndex - 1]),
-    });
+  if (stepId === 'situation') {
+    buttons = [
+      {
+        children: 'Annuler',
+        priority: 'secondary',
+        iconId: 'fr-icon-arrow-left-line',
+        onClick: () => goTo('end'),
+      },
+      {
+        children: 'Valider',
+        iconId: 'fr-icon-arrow-right-line',
+        iconPosition: 'right',
+        disabled: !canGoNext,
+        onClick: () => goTo(getStepAfterSituation(state)),
+      },
+    ];
+  } else {
+    buttons = [
+      isLastStep
+        ? {
+            children: 'Recommencer le parcours',
+            priority: 'secondary',
+            iconId: 'fr-icon-refresh-line',
+            onClick: () => {
+              setState(initialTutorialState);
+              goTo('welcome');
+            },
+          }
+        : {
+            children: stepId === 'welcome' ? 'Commencer' : 'Étape suivante',
+            iconId: 'fr-icon-arrow-right-line',
+            iconPosition: 'right',
+            disabled: !canGoNext,
+            onClick: () => goTo(steps[stepIndex + 1]),
+          },
+    ];
+
+    if (stepIndex > 0) {
+      buttons.unshift({
+        children: 'Étape précédente',
+        priority: 'secondary',
+        iconId: 'fr-icon-arrow-left-line',
+        onClick: () => goTo(steps[stepIndex - 1]),
+      });
+    }
   }
 
   return (
     <div>
       <div ref={titleRef} tabIndex={-1} style={{ outline: 'none', scrollMarginTop: '1rem' }}>
         <Stepper
-          currentStep={phases.indexOf(getStepPhase(stepId)) + 1}
+          // The detour stays on the last phase, the DSFR being already installed
+          currentStep={stepId === 'situation' ? phases.length : phases.indexOf(getStepPhase(stepId)) + 1}
           stepCount={phases.length}
           title={getStepTitle(stepId)}
-          nextTitle={!isLastStep ? getStepTitle(steps[stepIndex + 1]) : undefined}
+          nextTitle={stepId !== 'situation' && !isLastStep ? getStepTitle(steps[stepIndex + 1]) : undefined}
         />
       </div>
       {/* The key resets the internal state of fields when switching from one file step to another */}
@@ -173,11 +207,11 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
         )}
         {content}
       </div>
-      {!canGoNext && stepId === 'welcome' && (
+      {!canGoNext && (
         <p className={fr.cx('fr-text--sm')} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
           {state.hasFigmaFiles === null
-            ? 'Indiquez si vous avez des maquettes Figma à transférer pour commencer.'
-            : 'Sélectionnez la version du DSFR de vos maquettes pour commencer.'}
+            ? 'Indiquez si vous avez des maquettes Figma à transférer.'
+            : 'Sélectionnez la version du DSFR de vos maquettes.'}
         </p>
       )}
       <ButtonsGroup inlineLayoutWhen="sm and up" alignment="between" buttons={buttons} />
