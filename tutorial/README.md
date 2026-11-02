@@ -41,13 +41,13 @@ The build uses relative paths, so it works both on `https://<organization>.githu
 
 ## Embedding
 
-The iframe needs a few permissions to let the tutorial open the release files (downloads) and Penpot in new tabs:
+The iframe needs a few permissions: running the tutorial (`allow-scripts`), keeping its progress in the local storage (`allow-same-origin`), and opening the release files (downloads) and Penpot in new tabs (`allow-popups`, `allow-popups-to-escape-sandbox`, `allow-downloads`):
 
 ```html
 <iframe
   title="Installer le DSFR sur Penpot"
   src="https://<tutorial-domain>/"
-  sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms"
+  sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox"
 ></iframe>
 ```
 

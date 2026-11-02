@@ -12,6 +12,6 @@ export const figmaPluginUrl = 'https://www.figma.com/community/plugin/1219369440
 export const figmaPluginSourceUrl = 'https://github.com/penpot/penpot-exporter-figma-plugin';
 export const dsfrDocumentationUrl = 'https://www.systeme-de-design.gouv.fr/';
 export const supportEmail = 'penpot-dsfr@beta.gouv.fr';
-// Official guide explaining how to update the DSFR libraries on Figma and the files using them
-// TODO: point to the exact page once the SIG confirms it
-export const figmaLibraryUpdateGuideUrl = 'https://www.systeme-de-design.gouv.fr/';
+// Official guide to use the DSFR on Figma, its synchronization part explains how to update the libraries and the files using them
+export const figmaLibraryUpdateGuideUrl =
+  'https://www.systeme-de-design.gouv.fr/version-courante/fr/premiers-pas/vous-etes-designer/premiers-pas-sur-figma';

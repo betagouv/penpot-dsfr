@@ -2,8 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { ButtonProps } from '@codegouvfr/react-dsfr/Button';
 import { ButtonsGroup } from '@codegouvfr/react-dsfr/ButtonsGroup';
-import { Stepper } from '@codegouvfr/react-dsfr/Stepper';
-import { ReactNode, useMemo, useRef } from 'react';
+import { ReactNode, useMemo, useRef, useState } from 'react';
 
 import { EndStep } from '@tutorial/src/components/steps/EndStep';
 import { FigmaPluginStep } from '@tutorial/src/components/steps/FigmaPluginStep';
@@ -12,6 +11,7 @@ import { OptionalFilesStep } from '@tutorial/src/components/steps/OptionalFilesS
 import { PrepareWorkspaceStep } from '@tutorial/src/components/steps/PrepareWorkspaceStep';
 import { SituationStep } from '@tutorial/src/components/steps/SituationStep';
 import { WelcomeStep } from '@tutorial/src/components/steps/WelcomeStep';
+import { ClickableStepper } from '@tutorial/src/components/tutorial/ClickableStepper';
 import {
   StepId,
   TutorialState,
@@ -35,11 +35,16 @@ export interface TutorialProps {
   // Allows Storybook to start from a given state without polluting the browser storage of the real tutorial
   storageKey?: string;
   initialState?: Partial<TutorialState>;
+  // Disabled by Storybook, its stories start on a given step on purpose
+  askToResume?: boolean;
 }
 
-export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initialState }: TutorialProps) {
+export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initialState, askToResume = true }: TutorialProps) {
   const [state, setState] = useLocalStorageState<TutorialState>(storageKey, { ...initialTutorialState, ...initialState });
   const titleRef = useRef<HTMLDivElement>(null);
+  // The progress is kept in the browser, so someone coming back (to onboard a colleague, install on another team...) would land on
+  // a step without understanding why: when the page is loaded with a progress, they choose between resuming and starting again
+  const [isAskingToResume, setIsAskingToResume] = useState(() => askToResume && state.stepId !== 'welcome');
 
   const availableFileKeys = useMemo(() => getAvailableFileKeys(release), [release]);
   const optionalFileKeys = availableFileKeys.filter((key) => dsfrFiles[key].optional);
@@ -52,6 +57,7 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
   // Required files are always imported, optional ones only when selected
   const importedFileKeys = availableFileKeys.filter((key) => !dsfrFiles[key].optional || state.optionalFiles.includes(key));
   const latestDsfrVersion = getDsfrVersion(release);
+  const currentPhaseNumber = stepId === 'situation' ? phases.length : phases.indexOf(getStepPhase(stepId)) + 1;
 
   const goTo = (nextStepId: StepId) => {
     setState((previousState) => ({ ...previousState, stepId: nextStepId }));
@@ -59,6 +65,44 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
     titleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     titleRef.current?.focus({ preventScroll: true });
   };
+
+  const restart = () => {
+    setState(initialTutorialState);
+    goTo('welcome');
+  };
+
+  if (isAskingToResume) {
+    return (
+      <div>
+        <h2 className={fr.cx('fr-h3')}>Reprendre le parcours ?</h2>
+        <p>
+          Vous avez déjà commencé ce parcours sur ce navigateur, vous en étiez à l’étape {currentPhaseNumber} sur {phases.length},{' '}
+          <strong>« {getStepTitle(stepId)} »</strong>.
+        </p>
+        <ButtonsGroup
+          inlineLayoutWhen="sm and up"
+          alignment="between"
+          buttons={[
+            {
+              children: 'Recommencer depuis le début',
+              priority: 'secondary',
+              iconId: 'fr-icon-refresh-line',
+              onClick: () => {
+                restart();
+                setIsAskingToResume(false);
+              },
+            },
+            {
+              children: 'Reprendre à cette étape',
+              iconId: 'fr-icon-arrow-right-line',
+              iconPosition: 'right',
+              onClick: () => setIsAskingToResume(false),
+            },
+          ]}
+        />
+      </div>
+    );
+  }
 
   let content: ReactNode;
   // The version only matters for mockups to transfer, and an outdated one does not block (links can be fixed in Penpot)
@@ -160,10 +204,7 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
             children: 'Recommencer le parcours',
             priority: 'secondary',
             iconId: 'fr-icon-refresh-line',
-            onClick: () => {
-              setState(initialTutorialState);
-              goTo('welcome');
-            },
+            onClick: restart,
           }
         : {
             children: stepId === 'welcome' ? 'Commencer' : 'Étape suivante',
@@ -187,12 +228,14 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
   return (
     <div>
       <div ref={titleRef} tabIndex={-1} style={{ outline: 'none', scrollMarginTop: '1rem' }}>
-        <Stepper
+        <ClickableStepper
           // The detour stays on the last phase, the DSFR being already installed
-          currentStep={stepId === 'situation' ? phases.length : phases.indexOf(getStepPhase(stepId)) + 1}
-          stepCount={phases.length}
+          currentStep={currentPhaseNumber}
+          stepTitles={phases}
           title={getStepTitle(stepId)}
           nextTitle={stepId !== 'situation' && !isLastStep ? getStepTitle(steps[stepIndex + 1]) : undefined}
+          // A phase starts with its first step
+          onStepClick={(index) => goTo(steps.find((id) => getStepPhase(id) === phases[index])!)}
         />
       </div>
       {/* The key resets the internal state of fields when switching from one file step to another */}
@@ -207,13 +250,6 @@ export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initial
         )}
         {content}
       </div>
-      {!canGoNext && (
-        <p className={fr.cx('fr-text--sm')} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
-          {state.hasFigmaFiles === null
-            ? 'Indiquez si vous avez des maquettes Figma à transférer.'
-            : 'Sélectionnez la version du DSFR de vos maquettes.'}
-        </p>
-      )}
       <ButtonsGroup inlineLayoutWhen="sm and up" alignment="between" buttons={buttons} />
     </div>
   );

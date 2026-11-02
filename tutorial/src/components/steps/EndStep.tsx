@@ -80,7 +80,7 @@ export function EndStep({ hasFigmaFiles, onChangeSituation }: EndStepProps) {
         </>
       )}
 
-      <CallOut title="Une question, un problème ?" iconId="fr-icon-chat-3-line" titleAs="h2">
+      <CallOut title="Une question, un problème ?" iconId="fr-icon-chat-3-line" titleAs="h2" className={fr.cx('fr-mt-4w')}>
         Écrivez-nous à <a href={`mailto:${supportEmail}`}>{supportEmail}</a>, vos retours nous aident à améliorer cette expérimentation.
       </CallOut>
     </>

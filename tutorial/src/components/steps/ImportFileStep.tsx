@@ -63,7 +63,16 @@ export function ImportFileStep({ file, releaseFile, previousFileKeys }: ImportFi
       {file.extraFonts && file.extraFonts.length > 0 && (
         <Notice
           className={fr.cx('fr-mb-2w')}
-          title={`Ce fichier utilise aussi la police ${formatList(file.extraFonts)}. Propriétaire, elle ne peut pas être fournie : si elle est installée sur votre ordinateur (c’est généralement le cas sous Windows et macOS), ajoutez-la à votre équipe depuis votre dossier de polices (variantes Regular, Italic, Bold et Bold Italic). Sinon, Penpot affichera ces textes avec une police de remplacement.`}
+          title={
+            <>
+              Ce fichier utilise aussi la police {formatList(file.extraFonts)}. Propriétaire, elle ne peut pas être fournie : elle est installée
+              d’office sous Windows et macOS, ajoutez-la à votre équipe comme la police Marianne, avec ses variantes normale, italique, grasse et
+              grasse italique. Ses fichiers se trouvent dans <code>{'C:\\Windows\\Fonts'}</code> sous Windows et dans{' '}
+              <code>/System/Library/Fonts/Supplemental</code> sous macOS (dans la fenêtre de sélection,{' '}
+              <kbd style={{ whiteSpace: 'nowrap' }}>Cmd + Maj + G</kbd> permet de saisir ce chemin). Sans elle (sous Linux par exemple), Penpot
+              affichera ces textes avec une police de remplacement.
+            </>
+          }
         />
       )}
     </>

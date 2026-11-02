@@ -28,8 +28,9 @@ export function SituationFields({ latestDsfrVersion, hasFigmaFiles, onHasFigmaFi
           },
         ]}
       />
-      {hasFigmaFiles && latestDsfrVersion && (
-        <DsfrVersionSelect latestVersion={latestDsfrVersion} value={dsfrVersion} onChange={onDsfrVersionChange} />
+      {/* Always displayed so answering does not push the content down, only asked with mockups to transfer */}
+      {latestDsfrVersion && (
+        <DsfrVersionSelect latestVersion={latestDsfrVersion} value={dsfrVersion} onChange={onDsfrVersionChange} disabled={hasFigmaFiles !== true} />
       )}
     </>
   );

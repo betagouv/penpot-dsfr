@@ -13,18 +13,25 @@ export interface DsfrVersionSelectProps {
   latestVersion: string;
   value: string | null;
   onChange: (version: string) => void;
+  // Without mockups to transfer, the installed version is the one used and there is nothing to choose
+  disabled?: boolean;
 }
 
-export function DsfrVersionSelect({ latestVersion, value, onChange }: DsfrVersionSelectProps) {
+export function DsfrVersionSelect({ latestVersion, value, onChange, disabled = false }: DsfrVersionSelectProps) {
   const previousVersions = getPreviousMinorVersions(latestVersion, previousVersionsCount);
-  const isOutdated = value !== null && value !== latestVersion;
+  const isOutdated = !disabled && value !== null && value !== latestVersion;
 
   return (
     <>
       <Select
-        label="Quelle version du DSFR utilisent vos maquettes Figma ?"
-        hint="Elle figure dans le nom des bibliothèques DSFR utilisées par vos fichiers (onglet « Assets » puis « Libraries » dans Figma)."
-        nativeSelectProps={{ value: value ?? '', onChange: (event) => onChange(event.currentTarget.value) }}
+        label="Version du DSFR de vos maquettes"
+        hint={
+          disabled
+            ? 'Sans maquettes à transférer, vous concevrez directement avec la version installée dans Penpot, la plus récente disponible.'
+            : 'Elle figure dans le nom des bibliothèques DSFR de vos fichiers (onglet « Assets » puis « Libraries » dans Figma).'
+        }
+        disabled={disabled}
+        nativeSelectProps={{ value: disabled ? latestVersion : (value ?? ''), onChange: (event) => onChange(event.currentTarget.value) }}
       >
         <option value="" disabled hidden>
           Sélectionnez une version
@@ -53,9 +60,9 @@ export function DsfrVersionSelect({ latestVersion, value, onChange }: DsfrVersio
                 <li>
                   <strong>Idéalement</strong>, passez d’abord vos maquettes en version v{latestVersion} dans Figma en suivant{' '}
                   <a href={figmaLibraryUpdateGuideUrl} target="_blank" rel="noopener noreferrer">
-                    le guide officiel de mise à jour du DSFR
-                  </a>
-                  , puis revenez à ce parcours.
+                    le guide « Premiers pas sur Figma » du DSFR
+                  </a>{' '}
+                  (partie sur la mise à jour des bibliothèques), puis revenez à ce parcours.
                 </li>
                 <li>
                   <strong>Sinon</strong>, continuez avec votre version actuelle : vérifiez vos maquettes une fois dans Penpot et ajustez à la main les

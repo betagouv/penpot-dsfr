@@ -81,8 +81,8 @@ export function WelcomeStep({ release, fileKeys, hasFigmaFiles, onHasFigmaFilesC
             les fichiers importés entre eux.
           </li>
           <li>
-            Les fichiers Figma du DSFR restent la référence : l’installation va de Figma vers Penpot uniquement, ce que vous modifiez dans Penpot ne
-            revient pas dans Figma.
+            Le DSFR est conçu sur Figma, puis converti automatiquement pour Penpot à chaque nouvelle version : ne modifiez pas les fichiers du DSFR
+            une fois importés, vos changements ne seraient pas repris dans les versions suivantes.
           </li>
           <li>Utilisez de préférence un navigateur basé sur Chromium (Chrome, Edge…), mieux supporté par Penpot pour les fichiers volumineux.</li>
           <li>Gardez cette page ouverte à côté de Penpot le temps de l’installation, votre progression est conservée sur ce navigateur.</li>
@@ -97,13 +97,6 @@ export function WelcomeStep({ release, fileKeys, hasFigmaFiles, onHasFigmaFilesC
         dsfrVersion={dsfrVersion}
         onDsfrVersionChange={onDsfrVersionChange}
       />
-
-      <p className={fr.cx('fr-text--sm')} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
-        Version proposée :{' '}
-        <a href={release.htmlUrl} target="_blank" rel="noopener noreferrer">
-          {release.name}
-        </a>
-      </p>
     </>
   );
 }

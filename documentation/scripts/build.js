@@ -6,6 +6,7 @@
 // - `:::dsfr-doc-tab-navigation` (rendered as a list of links)
 // - `::dsfr-doc-storybook{storyId=...}` (rendered as a placeholder)
 // - `::::dsfr-doc-guidelines` / `:::dsfr-doc-guideline[label]{col=6 valid=true}`
+// - `:::fr-accordion[title]{id=...}` (a DSFR accordion, its content collapsed under the title)
 // - `::dsfr-doc-iframe-modal[label]{src=... title=...}` (new, opens an iframe into a DSFR modal, used for the Penpot tutorial)
 //
 // Usage: `npm run build` (output into `dist/`), `TUTORIAL_URL=http://localhost:5173/ npm run dev` to rebuild on changes
@@ -39,6 +40,7 @@ const tutorialUrl = process.env.TUTORIAL_URL;
 // - The iframe is not displayed while the modal is closed: the modal is only `visibility: hidden`, so the tutorial would be
 //   laid out while invisible, and WebKit (Safari, and every iOS browser) does not register its scrolling area when it is
 //   revealed, until a repaint such as switching tabs. Displaying it on opening lays it out while visible
+// - Since the tutorial loads on opening, a loader stays behind the iframe until the tutorial paints its own background
 const iframeModalCss = `
 .dsfr-doc-iframe-modal::before,
 .dsfr-doc-iframe-modal::after {
@@ -58,7 +60,44 @@ const iframeModalCss = `
   min-height: 0;
   margin-bottom: 1.5rem;
 }
+.dsfr-doc-iframe-modal__frame {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.dsfr-doc-iframe-modal__loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0;
+  color: var(--text-mention-grey);
+}
+.dsfr-doc-iframe-modal__loader::before {
+  content: "";
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0.25rem solid var(--border-default-grey);
+  border-top-color: var(--border-action-high-blue-france);
+  border-radius: 50%;
+  animation: dsfr-doc-iframe-modal-spin 0.8s linear infinite;
+}
+@keyframes dsfr-doc-iframe-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dsfr-doc-iframe-modal__loader::before {
+    animation-duration: 2.4s;
+  }
+}
 .dsfr-doc-iframe-modal iframe {
+  position: relative;
   display: block;
   flex: 1 1 auto;
   width: 100%;
@@ -149,6 +188,32 @@ function remarkDsfrDocDirectives() {
           ];
           break;
         }
+        case 'fr-accordion': {
+          const label = extractLabel(node) ?? [];
+          const id = attributes.id ?? `accordion-${node.position?.start.line}`;
+          const content = node.children;
+
+          setHast(node, 'section', { className: ['fr-accordion'] });
+          node.children = [
+            {
+              type: 'heading',
+              depth: 3,
+              data: { hProperties: { className: ['fr-accordion__title'] } },
+              children: [
+                {
+                  type: 'paragraph',
+                  data: {
+                    hName: 'button',
+                    hProperties: { type: 'button', className: ['fr-accordion__btn'], ariaExpanded: 'false', ariaControls: id },
+                  },
+                  children: label,
+                },
+              ],
+            },
+            { type: 'paragraph', data: { hName: 'div', hProperties: { className: ['fr-collapse'], id } }, children: content },
+          ];
+          break;
+        }
         case 'dsfr-doc-iframe-modal': {
           const label = extractLabel(node) ?? [{ type: 'text', value: 'Ouvrir' }];
           node.children = [];
@@ -189,13 +254,18 @@ function remarkDsfrDocDirectives() {
                         h('div', { className: ['fr-modal__content'] }, [
                           // Only for screen readers, the tutorial displays its own title and the space goes to it
                           h('h1', { id: `${modalId}-title`, className: ['fr-modal__title', 'fr-sr-only'] }, title),
-                          // The tutorial opens the release files and Penpot in new tabs, they must escape the sandbox
-                          h('iframe', {
-                            title: title,
-                            src: src,
-                            loading: 'lazy',
-                            sandbox: 'allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox allow-forms',
-                          }),
+                          // The loader is behind the iframe, hidden as soon as the tutorial paints its own background
+                          h('div', { className: ['dsfr-doc-iframe-modal__frame'] }, [
+                            h('p', { className: ['dsfr-doc-iframe-modal__loader'], ariaHidden: 'true' }, 'Chargement du parcours…'),
+                            // Scripts run the tutorial, the same origin keeps its progress (local storage), and it opens the release files
+                            // and Penpot in new tabs, that must escape the sandbox
+                            h('iframe', {
+                              title: title,
+                              src: src,
+                              loading: 'lazy',
+                              sandbox: 'allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox',
+                            }),
+                          ]),
                         ]),
                       ]),
                     ]),
@@ -253,6 +323,8 @@ function layout({ html, frontmatter, dsfrPath }) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- Only a preview, the page is meant to be published on systeme-de-design.gouv.fr -->
+    <meta name="robots" content="noindex, nofollow" />
     <title>${escapeHtml(frontmatter.title ?? 'Documentation')} - Prévisualisation</title>
     <meta name="description" content="${escapeHtml(frontmatter.description ?? '')}" />
     <link rel="stylesheet" href="${dsfrPath}/dsfr.min.css" />

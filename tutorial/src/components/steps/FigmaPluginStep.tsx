@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { ButtonProps } from '@codegouvfr/react-dsfr/Button';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { Button, ButtonProps } from '@codegouvfr/react-dsfr/Button';
 import { ButtonsGroup } from '@codegouvfr/react-dsfr/ButtonsGroup';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
 
@@ -49,30 +50,48 @@ export function FigmaPluginStep({
         étant ouvert.
       </p>
 
-      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>1. Exporter depuis Figma</h2>
+      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>1. Vérifier les bibliothèques de vos maquettes</h2>
       <p>
-        Avant l’export, vérifiez dans le panneau <strong>Bibliothèques</strong> de Figma que votre fichier n’utilise que les bibliothèques DSFR de la
-        version installée, sans bibliothèque manquante : les éléments liés à une autre version ne pourront pas être reliés.
+        Dans Figma, ouvrez le fichier de maquettes que vous voulez transférer (celui de votre service, pas un fichier du DSFR), puis le panneau{' '}
+        <strong>Bibliothèques</strong> de l’onglet <em>Assets</em>. Les bibliothèques DSFR utilisées par vos maquettes doivent être celles de la
+        version installée dans Penpot{latestDsfrVersion && <> (v{latestDsfrVersion})</>}, et aucune ne doit être signalée comme manquante : les
+        éléments liés à une autre bibliothèque ne pourront pas être reliés au DSFR dans Penpot.
       </p>
+
+      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>2. Exporter avec le plugin Penpot Exporter</h2>
+      <p>
+        Le bouton ci-dessous ouvre la page du plugin dans Figma : cliquez sur <strong>Open in…</strong> et choisissez votre fichier de maquettes.
+        Depuis le fichier, vous le retrouverez ensuite avec le bouton <strong>Actions</strong> de la barre d’outils, onglet <em>Plugins & widgets</em>
+        .
+      </p>
+      <Button
+        iconId="fr-icon-external-link-line"
+        iconPosition="right"
+        priority="secondary"
+        className={fr.cx('fr-mb-3w')}
+        linkProps={{ href: figmaPluginUrl, target: '_blank', rel: 'noopener noreferrer' }}
+      >
+        Ouvrir le plugin Penpot Exporter
+      </Button>
       <ol>
         <li>
-          Dans Figma, ouvrez votre fichier puis lancez le plugin <strong>Penpot Exporter</strong> (menu <em>Plugins</em>).
+          Dans la section <strong>External Libraries</strong>, le plugin liste les bibliothèques utilisées par vos maquettes.
+          {importedFileKeys.length > 0 && (
+            <>
+              {' '}
+              Pour les bibliothèques DSFR, ce sont les fichiers que vous venez d’importer dans Penpot :{' '}
+              {formatList(importedFileKeys.map((key) => `« ${release.files[key]?.fileName ?? dsfrFiles[key].label} »`))}.
+            </>
+          )}
         </li>
         <li>
-          Dans la section <strong>External Libraries</strong>, le plugin liste les bibliothèques détectées dans votre fichier. Pour chacune des
-          bibliothèques DSFR, ouvrez le fichier correspondant dans Penpot, copiez l’adresse affichée dans la barre de votre navigateur et collez-la
-          dans le champ du plugin.
+          Pour chacune, ouvrez le fichier correspondant dans Penpot, copiez l’adresse affichée dans la barre de votre navigateur et collez-la dans le
+          champ du plugin.
         </li>
         <li>
           Lancez l’export et enregistrez le fichier <code>.penpot</code> obtenu.
         </li>
       </ol>
-      {importedFileKeys.length > 0 && (
-        <p className={fr.cx('fr-text--sm')}>
-          Les bibliothèques DSFR de votre espace Penpot :{' '}
-          {formatList(importedFileKeys.map((key) => `« ${release.files[key]?.fileName ?? dsfrFiles[key].label} »`))}.
-        </p>
-      )}
 
       <figure className={fr.cx('fr-content-media', 'fr-mt-2w')} role="group" aria-label="© Penpot Exporter">
         <img
@@ -87,37 +106,44 @@ export function FigmaPluginStep({
           }}
         />
         <figcaption className={fr.cx('fr-content-media__caption')}>
-          Les adresses de vos bibliothèques DSFR collées dans la section « External Libraries » du plugin. Le message orange rappelle que vos
-          maquettes doivent être importées sur la même instance Penpot que les bibliothèques.
+          Exemple : chaque bibliothèque DSFR détectée par le plugin reçoit l’adresse de son fichier dans Penpot.
         </figcaption>
       </figure>
 
       {notImportedFileKeys.length > 0 && (
-        <>
-          <Notice
-            className={fr.cx('fr-mb-2w')}
-            title="Si vos maquettes utilisent des éléments des fichiers ci-dessous, importez-les d’abord, sinon ces éléments seront transférés sans lien avec le DSFR."
-          />
-          <ButtonsGroup
-            inlineLayoutWhen="sm and up"
-            buttonsSize="small"
-            // Only rendered when there is at least one file
-            buttons={
-              notImportedFileKeys.map((key): ButtonProps => ({
-                children: `Importer « ${dsfrFiles[key].label} »`,
-                priority: 'secondary',
-                iconId: 'fr-icon-download-line',
-                onClick: () => onImportFile(key),
-              })) as [ButtonProps, ...ButtonProps[]]
-            }
-          />
-        </>
+        <Alert
+          severity="info"
+          small
+          className={fr.cx('fr-mb-4w')}
+          description={
+            <>
+              <p className={fr.cx('fr-mb-2w')}>
+                Si vos maquettes utilisent des éléments des fichiers ci-dessous, importez-les d’abord, sinon ces éléments seront transférés sans lien
+                avec le DSFR.
+              </p>
+              <ButtonsGroup
+                inlineLayoutWhen="sm and up"
+                buttonsSize="small"
+                className={fr.cx('fr-mb-0')}
+                // Only rendered when there is at least one file
+                buttons={
+                  notImportedFileKeys.map((key): ButtonProps => ({
+                    children: `Importer « ${dsfrFiles[key].label} »`,
+                    priority: 'secondary',
+                    iconId: 'fr-icon-download-line',
+                    onClick: () => onImportFile(key),
+                  })) as [ButtonProps, ...ButtonProps[]]
+                }
+              />
+            </>
+          }
+        />
       )}
 
-      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>2. Importer le résultat dans Penpot</h2>
+      <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>3. Importer le résultat dans Penpot</h2>
       <p>
-        Comme pour les fichiers DSFR, importez le fichier <code>.penpot</code> obtenu dans le projet de votre choix. Les composants DSFR qu’il
-        contient pointeront vers vos bibliothèques.
+        Comme pour les fichiers DSFR, importez le fichier <code>.penpot</code> obtenu dans le projet de votre choix, sur la même instance Penpot que
+        vos bibliothèques DSFR. Les composants DSFR qu’il contient pointeront vers elles.
       </p>
 
       <h2 className={fr.cx('fr-h4', 'fr-mt-4w')}>Vos maquettes utilisent d’autres de vos fichiers Figma ?</h2>
@@ -147,9 +173,8 @@ export function FigmaPluginStep({
         />
       )}
       <p className={fr.cx('fr-text--sm')} style={{ color: fr.colors.decisions.text.mention.grey.default }}>
-        Les fichiers très volumineux peuvent prendre du temps à exporter : préférez l’application Figma pour ordinateur, ne sélectionnez que certaines
-        pages dans le plugin, ou demandez l’aide d’une personne disposant d’un poste plus puissant. En cas de blocage,{' '}
-        <a href={`mailto:${supportEmail}`}>contactez-nous</a>.
+        Les fichiers très volumineux peuvent prendre du temps à exporter : préférez l’application Figma pour ordinateur, ou demandez l’aide d’une
+        personne disposant d’un poste plus puissant. En cas de blocage, <a href={`mailto:${supportEmail}`}>contactez-nous</a>.
       </p>
     </>
   );

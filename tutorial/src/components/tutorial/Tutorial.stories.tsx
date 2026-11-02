@@ -8,6 +8,7 @@ const meta = {
   component: Tutorial,
   args: {
     release: releaseFixture,
+    askToResume: false,
   },
 } satisfies Meta<typeof Tutorial>;
 
@@ -18,6 +19,15 @@ type Story = StoryObj<typeof meta>;
 // Each story uses its own storage key so the navigation done in one does not leak into the others
 export const Start: Story = {
   args: { storageKey: 'storybook-tutorial-start' },
+};
+
+// What someone coming back to the tutorial with a progress sees first
+export const Resume: Story = {
+  args: {
+    storageKey: 'storybook-tutorial-resume',
+    initialState: { stepId: 'file-fondamentaux' },
+    askToResume: true,
+  },
 };
 
 export const ImportComposants: Story = {
