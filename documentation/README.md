@@ -34,7 +34,11 @@ It is expected to render a button opening a DSFR modal (`fr-modal`) as wide as i
 ></iframe>
 ```
 
-The tutorial is long and used for a while, so the modal takes the whole screen height. From the md breakpoint the DSFR keeps 10% of the screen above and under a modal (`::before` and `::after` spacers, not overridable inline), so a class on the `fr-modal` and this CSS are needed (see `scripts/build.js`):
+The tutorial is long and used for a while, so the modal takes the whole screen height, the iframe filling it so the tutorial is the only scrolling area. A class on the `fr-modal` and this CSS are needed (see `scripts/build.js`):
+
+- From the md breakpoint the DSFR keeps 10% of the screen above and under a modal (`::before` and `::after` spacers, not overridable inline)
+- On mobile `100vh` is the height with the browser toolbars retracted, but the open modal locks the page scroll so they never retract, and the bottom of the tutorial (its navigation buttons) would stay under them. The DSFR script already measures the visible height into `--modal-max-height`, so the body uses it at every breakpoint and the iframe fills the rest
+- The iframe is not displayed while the modal is closed: the modal is only `visibility: hidden`, and WebKit (Safari, and every iOS browser) does not register the scrolling area of an iframe laid out while invisible, until a repaint such as switching tabs
 
 ```css
 .dsfr-doc-iframe-modal::before,
@@ -43,17 +47,27 @@ The tutorial is long and used for a while, so the modal takes the whole screen h
   flex-basis: 1rem;
 }
 .dsfr-doc-iframe-modal .fr-modal__body {
-  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  height: var(--modal-max-height);
+  max-height: var(--modal-max-height);
 }
 .dsfr-doc-iframe-modal .fr-modal__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   margin-bottom: 1.5rem;
 }
 .dsfr-doc-iframe-modal iframe {
   display: block;
+  flex: 1 1 auto;
   width: 100%;
-  height: calc(100vh - 8rem); /* fills the modal body without a second scrollbar */
-  min-height: 20rem;
+  min-height: 0;
   border: 0;
+}
+.dsfr-doc-iframe-modal:not(.fr-modal--opened) iframe {
+  display: none;
 }
 ```
 

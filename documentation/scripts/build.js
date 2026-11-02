@@ -30,7 +30,15 @@ const tutorialUrl = process.env.TUTORIAL_URL;
 
 // The DSFR keeps 10% of the screen above and under a modal from the md breakpoint (`::before` and `::after` spacers, so not
 // overridable inline) and 4rem under its content. The tutorial is long and used for a while, it gets the whole screen height
-// as on mobile, the iframe filling the modal body without a second scrollbar (header and bottom space subtracted)
+// as on mobile, the iframe filling the modal body so the tutorial is the only scrolling area.
+//
+// - Height: on mobile `100vh` is the height with the browser toolbars retracted, but the open modal locks the page scroll so
+//   they never retract and the bottom of the tutorial (its navigation buttons) stays under them. The DSFR script already
+//   measures the visible height (`window.innerHeight`, updated on resize) into `--modal-max-height`, so the body uses it at
+//   every breakpoint (the md one replaces it by `80vh`) and the iframe fills the rest through flex instead of its own `vh`
+// - The iframe is not displayed while the modal is closed: the modal is only `visibility: hidden`, so the tutorial would be
+//   laid out while invisible, and WebKit (Safari, and every iOS browser) does not register its scrolling area when it is
+//   revealed, until a repaint such as switching tabs. Displaying it on opening lays it out while visible
 const iframeModalCss = `
 .dsfr-doc-iframe-modal::before,
 .dsfr-doc-iframe-modal::after {
@@ -38,17 +46,27 @@ const iframeModalCss = `
   flex-basis: 1rem;
 }
 .dsfr-doc-iframe-modal .fr-modal__body {
-  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  height: var(--modal-max-height);
+  max-height: var(--modal-max-height);
 }
 .dsfr-doc-iframe-modal .fr-modal__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   margin-bottom: 1.5rem;
 }
 .dsfr-doc-iframe-modal iframe {
   display: block;
+  flex: 1 1 auto;
   width: 100%;
-  height: calc(100vh - 8rem);
-  min-height: 20rem;
+  min-height: 0;
   border: 0;
+}
+.dsfr-doc-iframe-modal:not(.fr-modal--opened) iframe {
+  display: none;
 }
 `;
 
