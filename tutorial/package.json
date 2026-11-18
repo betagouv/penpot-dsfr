@@ -1,0 +1,52 @@
+{
+  "name": "penpot-dsfr-tutorial",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/betagouv/penpot-dsfr.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "react-dsfr copy-static-assets",
+    "predev": "react-dsfr update-icons",
+    "prebuild": "react-dsfr update-icons",
+    "predev:storybook": "react-dsfr update-icons",
+    "prebuild:storybook": "react-dsfr update-icons",
+    "dev": "vite --host 0.0.0.0",
+    "dev:storybook": "storybook dev -p 6006 --host 0.0.0.0 --no-open",
+    "build": "tsc --noEmit && vite build",
+    "build:storybook": "storybook build -o dist/storybook",
+    "preview": "vite preview",
+    "release:prepare": "tsx scripts/prepare-release.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest"
+  },
+  "dependencies": {
+    "@codegouvfr/react-dsfr": "^1.36.0",
+    "fflate": "^0.8.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.6.3",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "prettier": "^3.9.10",
+    "storybook": "^10.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

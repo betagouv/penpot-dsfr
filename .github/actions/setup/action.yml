@@ -1,0 +1,24 @@
+name: Setup
+description: Node and a lockfile-strict install of one of the web projects (`tutorial`, `documentation`).
+
+inputs:
+  node-version:
+    description: Node.js version
+    required: true
+  working-directory:
+    description: Folder of the project to install
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm # npm cache is better than caching node_modules because it will check integrity on each run
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm ci

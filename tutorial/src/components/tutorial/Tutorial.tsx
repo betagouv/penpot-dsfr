@@ -1,0 +1,260 @@
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { ButtonProps } from '@codegouvfr/react-dsfr/Button';
+import { ButtonsGroup } from '@codegouvfr/react-dsfr/ButtonsGroup';
+import { ReactNode, useMemo, useRef, useState } from 'react';
+
+import { EndStep } from '@tutorial/src/components/steps/EndStep';
+import { FigmaPluginStep } from '@tutorial/src/components/steps/FigmaPluginStep';
+import { FontsStep } from '@tutorial/src/components/steps/FontsStep';
+import { ImportFileStep } from '@tutorial/src/components/steps/ImportFileStep';
+import { OptionalFilesStep } from '@tutorial/src/components/steps/OptionalFilesStep';
+import { PrepareWorkspaceStep } from '@tutorial/src/components/steps/PrepareWorkspaceStep';
+import { RelinkStep } from '@tutorial/src/components/steps/RelinkStep';
+import { SituationStep } from '@tutorial/src/components/steps/SituationStep';
+import { WelcomeStep } from '@tutorial/src/components/steps/WelcomeStep';
+import { ClickableStepper } from '@tutorial/src/components/tutorial/ClickableStepper';
+import {
+  StepId,
+  TutorialState,
+  getAvailableFileKeys,
+  getFileKeyFromStepId,
+  getPhases,
+  getStepAfterSituation,
+  getStepPhase,
+  getStepTitle,
+  getSteps,
+  initialTutorialState,
+  isFirstStepAfterImports,
+  toFileStepId,
+} from '@tutorial/src/components/tutorial/model';
+import { dsfrFiles } from '@tutorial/src/config/dsfr-files';
+import { Release, getDsfrVersion } from '@tutorial/src/config/release';
+import { useLocalStorageState } from '@tutorial/src/hooks/useLocalStorageState';
+
+export interface TutorialProps {
+  release: Release;
+  // Allows Storybook to start from a given state without polluting the browser storage of the real tutorial
+  storageKey?: string;
+  initialState?: Partial<TutorialState>;
+  // Disabled by Storybook, its stories start on a given step on purpose
+  askToResume?: boolean;
+}
+
+export function Tutorial({ release, storageKey = 'penpot-dsfr-tutorial', initialState, askToResume = true }: TutorialProps) {
+  const [state, setState] = useLocalStorageState<TutorialState>(storageKey, { ...initialTutorialState, ...initialState });
+  const titleRef = useRef<HTMLDivElement>(null);
+  // The progress is kept in the browser, so someone coming back (to onboard a colleague, install on another team...) would land on
+  // a step without understanding why: when the page is loaded with a progress, they choose between resuming and starting again
+  const [isAskingToResume, setIsAskingToResume] = useState(() => askToResume && state.stepId !== 'welcome');
+
+  const availableFileKeys = useMemo(() => getAvailableFileKeys(release), [release]);
+  const optionalFileKeys = availableFileKeys.filter((key) => dsfrFiles[key].optional);
+  const steps = getSteps(state, release);
+  // A stored step may not exist anymore (new release without a file...)
+  const stepId: StepId = state.stepId === 'situation' || steps.includes(state.stepId) ? state.stepId : steps[0];
+  const stepIndex = steps.indexOf(stepId);
+  const phases = getPhases(steps);
+  const fileKey = getFileKeyFromStepId(stepId);
+  // Required files are always imported, optional ones only when selected
+  const importedFileKeys = availableFileKeys.filter((key) => !dsfrFiles[key].optional || state.optionalFiles.includes(key));
+  const latestDsfrVersion = getDsfrVersion(release);
+  const currentPhaseNumber = stepId === 'situation' ? phases.length : phases.indexOf(getStepPhase(stepId)) + 1;
+
+  const goTo = (nextStepId: StepId) => {
+    setState((previousState) => ({ ...previousState, stepId: nextStepId }));
+    // Make sure the user sees the top of the new step, and screen readers announce it
+    titleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    titleRef.current?.focus({ preventScroll: true });
+  };
+
+  const restart = () => {
+    setState(initialTutorialState);
+    goTo('welcome');
+  };
+
+  if (isAskingToResume) {
+    return (
+      <div>
+        <h2 className={fr.cx('fr-h3')}>Reprendre le parcours ?</h2>
+        <p>
+          Vous avez déjà commencé ce parcours sur ce navigateur, vous en étiez à l’étape {currentPhaseNumber} sur {phases.length},{' '}
+          <strong>« {getStepTitle(stepId)} »</strong>.
+        </p>
+        <ButtonsGroup
+          inlineLayoutWhen="sm and up"
+          alignment="between"
+          buttons={[
+            {
+              children: 'Recommencer depuis le début',
+              priority: 'secondary',
+              iconId: 'fr-icon-refresh-line',
+              onClick: () => {
+                restart();
+                setIsAskingToResume(false);
+              },
+            },
+            {
+              children: 'Reprendre à cette étape',
+              iconId: 'fr-icon-arrow-right-line',
+              iconPosition: 'right',
+              onClick: () => setIsAskingToResume(false),
+            },
+          ]}
+        />
+      </div>
+    );
+  }
+
+  let content: ReactNode;
+  // The version only matters for mockups to transfer, and an outdated one does not block (links can be fixed in Penpot)
+  const isSituationComplete = state.hasFigmaFiles === false || (state.hasFigmaFiles === true && (!latestDsfrVersion || state.dsfrVersion !== null));
+  const canGoNext = stepId !== 'welcome' && stepId !== 'situation' ? true : isSituationComplete;
+
+  if (fileKey) {
+    content = (
+      <ImportFileStep
+        file={dsfrFiles[fileKey]}
+        releaseFile={release.files[fileKey]!}
+        previousFileKeys={availableFileKeys.slice(0, availableFileKeys.indexOf(fileKey)).filter((key) => importedFileKeys.includes(key))}
+      />
+    );
+  } else {
+    switch (stepId) {
+      case 'welcome':
+        content = (
+          <WelcomeStep
+            release={release}
+            fileKeys={availableFileKeys}
+            hasFigmaFiles={state.hasFigmaFiles}
+            onHasFigmaFilesChange={(hasFigmaFiles) => setState((previousState) => ({ ...previousState, hasFigmaFiles }))}
+            dsfrVersion={state.dsfrVersion}
+            onDsfrVersionChange={(dsfrVersion) => setState((previousState) => ({ ...previousState, dsfrVersion }))}
+          />
+        );
+        break;
+      case 'prepare':
+        content = <PrepareWorkspaceStep />;
+        break;
+      case 'optional-files':
+        content = (
+          <OptionalFilesStep
+            release={release}
+            fileKeys={optionalFileKeys}
+            selectedFileKeys={state.optionalFiles}
+            onChange={(optionalFiles) => setState((previousState) => ({ ...previousState, optionalFiles }))}
+          />
+        );
+        break;
+      case 'fonts':
+        content = <FontsStep />;
+        break;
+      case 'figma':
+        content = (
+          <FigmaPluginStep
+            notImportedFileKeys={availableFileKeys.filter((key) => !importedFileKeys.includes(key))}
+            onImportFile={(key) => {
+              setState((previousState) => ({
+                ...previousState,
+                optionalFiles: dsfrFiles[key].optional ? Array.from(new Set([...previousState.optionalFiles, key])) : previousState.optionalFiles,
+              }));
+              goTo(toFileStepId(key));
+            }}
+          />
+        );
+        break;
+      case 'relink':
+        content = <RelinkStep latestDsfrVersion={latestDsfrVersion} dsfrVersion={state.dsfrVersion} />;
+        break;
+      case 'situation':
+        content = (
+          <SituationStep
+            latestDsfrVersion={latestDsfrVersion}
+            hasFigmaFiles={state.hasFigmaFiles}
+            onHasFigmaFilesChange={(hasFigmaFiles) => setState((previousState) => ({ ...previousState, hasFigmaFiles }))}
+            dsfrVersion={state.dsfrVersion}
+            onDsfrVersionChange={(dsfrVersion) => setState((previousState) => ({ ...previousState, dsfrVersion }))}
+          />
+        );
+        break;
+      default:
+        content = <EndStep hasFigmaFiles={state.hasFigmaFiles} onChangeSituation={() => goTo('situation')} />;
+    }
+  }
+
+  const isLastStep = stepIndex === steps.length - 1;
+  let buttons: [ButtonProps, ...ButtonProps[]];
+
+  if (stepId === 'situation') {
+    buttons = [
+      {
+        children: 'Annuler',
+        priority: 'secondary',
+        iconId: 'fr-icon-arrow-left-line',
+        onClick: () => goTo('end'),
+      },
+      {
+        children: 'Valider',
+        iconId: 'fr-icon-arrow-right-line',
+        iconPosition: 'right',
+        disabled: !canGoNext,
+        onClick: () => goTo(getStepAfterSituation(state)),
+      },
+    ];
+  } else {
+    buttons = [
+      isLastStep
+        ? {
+            children: 'Recommencer le parcours',
+            priority: 'secondary',
+            iconId: 'fr-icon-refresh-line',
+            onClick: restart,
+          }
+        : {
+            children: stepId === 'welcome' ? 'Commencer' : 'Étape suivante',
+            iconId: 'fr-icon-arrow-right-line',
+            iconPosition: 'right',
+            disabled: !canGoNext,
+            onClick: () => goTo(steps[stepIndex + 1]),
+          },
+    ];
+
+    if (stepIndex > 0) {
+      buttons.unshift({
+        children: 'Étape précédente',
+        priority: 'secondary',
+        iconId: 'fr-icon-arrow-left-line',
+        onClick: () => goTo(steps[stepIndex - 1]),
+      });
+    }
+  }
+
+  return (
+    <div>
+      <div ref={titleRef} tabIndex={-1} style={{ outline: 'none', scrollMarginTop: '1rem' }}>
+        <ClickableStepper
+          // The detour stays on the last phase, the DSFR being already installed
+          currentStep={currentPhaseNumber}
+          stepTitles={phases}
+          title={getStepTitle(stepId)}
+          nextTitle={stepId !== 'situation' && !isLastStep ? getStepTitle(steps[stepIndex + 1]) : undefined}
+          // A phase starts with its first step
+          onStepClick={(index) => goTo(steps.find((id) => getStepPhase(id) === phases[index])!)}
+        />
+      </div>
+      {/* The key resets the internal state of fields when switching from one file step to another */}
+      <div key={stepId} className={fr.cx('fr-mb-4w')}>
+        {isFirstStepAfterImports(steps, stepId) && (
+          <Alert
+            severity="success"
+            small
+            className={fr.cx('fr-mb-4w')}
+            description="Bravo, le DSFR est installé : les membres de votre équipe peuvent dès à présent utiliser ses composants, couleurs et typographies."
+          />
+        )}
+        {content}
+      </div>
+      <ButtonsGroup inlineLayoutWhen="sm and up" alignment="between" buttons={buttons} />
+    </div>
+  );
+}

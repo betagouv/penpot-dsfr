@@ -1,124 +1,122 @@
 # penpot-dsfr
 
-This repository contains all the logic to automate the synchronization between [DSFR files from Figma](https://www.figma.com/@gouvfr) and those on Penpot. The idea is to leverage the open-source Penpot design tool without requiring our design system team to change anything in their daily work. Figma files remain our sources of truth, and their "cloned" versions on Penpot provide a design tool for product teams that either struggle with Figma subscriptions, or with hosting sensitive designs outside France.
+This repository makes the [DSFR Figma files](https://www.figma.com/@gouvfr) (the French government design system) available on [Penpot](https://penpot.app/), the open-source design tool. Figma files remain the source of truth, so the design system team does not change its daily work, and their Penpot copies serve product teams that either struggle with Figma subscriptions or need to keep their mockups on infrastructures they control.
+
+By default, administrations use the Penpot instance of the SIG (the team managing the DSFR): https://penpot.systeme-de-design.gouv.fr/.
+
+> [!TIP]
+> **To install the DSFR into your Penpot team, follow [the interactive tutorial](https://betagouv.github.io/penpot-dsfr/)** (in French). It guides you step by step, from the preparation of your workspace to the transfer of your Figma mockups, and explains the known limitations. The rest of this page is for the maintainers of the conversion.
 
 ![](docs/files_preview.png 'DSFR files preview')
 
-> [!IMPORTANT]
-> `penpot-dsfr` is an experiment and the user experience may not be perfect (mainly due to technical limitations). Do not hesitate to share your thoughts by contacting us at [penpot-dsfr@beta.gouv.fr](mailto:penpot-dsfr@beta.gouv.fr).
+## How it works
 
-## Prepare DSFR as libraries on Penpot
+```mermaid
+%%{init: {'theme':'base','look':'classic','themeVariables':{'lineColor':'#6a6af4'}}}%%
+flowchart LR
+  figma("DSFR Figma files") --> sync("figpot<br>(scripts/synchronize.sh)") --> penpot("Penpot files of this project")
+  penpot --> export("manual export") --> release(".penpot files in a GitHub release")
+  release --> tutorial("interactive tutorial") --> team("Penpot workspace of a product team")
+  mockups("Figma mockups of the team") --> plugin("Penpot Exporter plugin") --> team
+  classDef figma fill:#e3e3fd,stroke:#000091,color:#161616;
+  classDef penpot fill:#dffee6,stroke:#18753c,color:#161616;
+  classDef release fill:#feecc2,stroke:#b34000,color:#161616;
+  classDef step fill:#ffffff,stroke:#6a6af4,stroke-dasharray:4 3,color:#161616;
+  class figma,mockups figma;
+  class penpot,team penpot;
+  class release release;
+  class sync,export,tutorial,plugin step;
+```
 
-### Files must be uploaded by yourself
+1. **Conversion, done once per DSFR version by us**: [figpot](https://github.com/betagouv/figpot) synchronizes the 5 DSFR Figma files into Penpot files, keeping the links between them. They are exported as `.penpot` files and published in [the releases](https://github.com/betagouv/penpot-dsfr/releases). Product teams never have to convert the DSFR themselves.
+2. **Installation, done once per Penpot team**: Penpot cannot share a library across teams, so each team imports the files into its own workspace. Since the files reference each other, they must be imported in order, each one shared as a library before importing the next: since Penpot 2.19, an import links the libraries of the file to the shared files of the team having the same name. The [interactive tutorial](https://betagouv.github.io/penpot-dsfr/) guides users through these steps (it is also opened from [the page proposed to the DSFR documentation](documentation/)).
+3. **Transfer of existing mockups, optional**: product teams convert their own Figma files with the official [Penpot Exporter](https://www.figma.com/community/plugin/1219369440655168734/penpot-exporter) Figma plugin, giving it the Penpot addresses of their DSFR libraries so the components stay bound. Their mockups should use the same DSFR version as the one installed: the tutorial asks for it and advises migrating in Figma first, otherwise components with a lost link have to be fixed by hand in Penpot (teams starting from scratch use the installed version).
 
-There is no marketplace where our published files can be cloned easily, and Penpot teams workspaces are isolated so we cannot connect your account directly on the files we want public.
+The files depend on each other in this order (each file can use the previous ones):
 
-**So it requires from you a few steps to do once on https://design.penpot.app/ (described below).** It means if you then invite new members from your team on your files, they won't have to bother with those steps.
+```
+Pictogrammes ← Fondamentaux ← Composants ← Modèles, Bêta
+```
 
-### Set up fonts
+_On Figma, `Pictogrammes` and `Fondamentaux` use each other. To allow importing them one after the other, `Pictogrammes` is converted without any dependency, and the few components of `Composants` used in the presentation pages of `Fondamentaux` are kept as plain shapes._
 
-To have DSFR files well displayed your team workspace need to know about specific fonts to use (in our case `Marianne` which is the official font for the [DSFR](https://github.com/GouvernementFR/dsfr)).
+## Repository layout
 
-1. Download the 12 font variants with TTF format from the bottom page of https://www.info.gouv.fr/marque-de-letat/la-typographie
-2. Unzip the archive
-3. Log on https://design.penpot.app and in the left panel go to the `Fonts` section
-4. Click `Add custom font`, select the 12 font variants just downloaded and validate
-5. Once you see them listed as "pending" in the interface, click on `Upload all`
+| Path                                                                         | Content                                                                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| [`scripts/synchronize.sh`](scripts/synchronize.sh)                           | figpot parameters of each DSFR file (Figma and Penpot identifiers, libraries, exclusions)               |
+| [`data/`](data/)                                                             | figpot data: mappings between Figma and Penpot elements (`documents/`), cached Figma images (`medias/`) |
+| [`tutorial/`](tutorial/)                                                     | Interactive tutorial installing the DSFR into a Penpot team (static website)                            |
+| [`documentation/`](documentation/)                                           | Page written for https://www.systeme-de-design.gouv.fr/, with a local preview                           |
+| [`.github/workflows/sync.yml`](.github/workflows/sync.yml)                   | Synchronization of the DSFR files (manual trigger)                                                      |
+| [`.github/workflows/documentation.yml`](.github/workflows/documentation.yml) | Checks, builds and GitHub Pages deployment of the tutorial and the documentation preview                |
 
-![](docs/fonts_panel.png 'Fonts panel')
+## Synchronizing the DSFR files
 
-In case you want to use the file `DSFR - Modèles - Vx.y.z`, it's a bit unexpected, but it requires the font `Arial`. In this case, browse your fonts folder locally and find `Arial` files at least for variants `Regular`, `Regular Italic`, `Bold`, `Bold Italic`. _(In the future we may force the removal of `Arial` to simplify the process since this is not an open-source font)_
+This part is for maintainers converting a new DSFR version.
 
-### Import DSFR files
+### Prerequisites
 
-Go to https://github.com/betagouv/penpot-dsfr/releases and for each version your will have all DSFR files in the Penpot format `.penpot`:
+- **[figpot](https://github.com/betagouv/figpot)**: `scripts/synchronize.sh` runs it with `npx`, the `FIGPOT` variable allows using another command (a local checkout for example)
+- **Access tokens** (see the figpot documentation): `FIGMA_ACCESS_TOKEN`, `PENPOT_ACCESS_TOKEN`, and `PENPOT_BASE_URL` for an instance other than design.penpot.app (e.g. `https://penpot.systeme-de-design.gouv.fr`)
+- **Penpot credentials** for the hydration (see below): `PENPOT_USER_EMAIL`, `PENPOT_USER_PASSWORD`
+- **Around 8 GB of RAM** for `Composants`: Node.js limits its memory by default, raise it with `NODE_OPTIONS=--max-old-space-size=8192` (the CI uses 12 GB)
 
-- `DSFR - Composants - v1.xx (Community)`
-- `DSFR - Fondamentaux - v1.xx (Community)`
-- `DSFR - Modèles - V1.xx (Community)`
-- `DSFR - Bêta - V1.xx (Community)`
-- `DSFR - Pictogrammes - V1.xx (Community)`
+### Prepare the Figma files
 
-Download them, then within your Penpot workspace you can create a new project (named for example `DSFR`) and by overlaying the project area you will see a `three dots` button to trigger `Import Penpot files`.
+The DSFR files on https://www.figma.com/@gouvfr belong to [the SIG](https://www.info.gouv.fr/organisation/service-d-information-du-gouvernement-sig). figpot needs a Figma token able to read their styles and components, so we work on our own copies:
 
-Once done and from your project view, right click on each of those imported file and click `Add as Shared Library` and confirm your choice. Like that their components, colors and typographies can be accessed from other files.
+1. Duplicate the DSFR files of the version to convert into our Figma workspace
+2. In each file, open the libraries panel and remove the libraries that are not used
+3. Swap the libraries still pointing to the original files or to older versions with our copies (tick "for all pages"), and repeat until nothing is left
+4. Old references can still hide in hidden layers of instances (the Figma interface does not list them, figpot does): fix them in Figma, for example with a script using `figma.skipInvisibleInstanceChildren = false`
+5. Update the Figma file keys in `scripts/synchronize.sh`
 
-_Note that `Modèles` and `Bêta` files just present some structures and **are not core files**. They are not intended to be used as libraries so you could totally avoid promoting them as libraries, and even importing them._
+_`Composants` v1.14 has a `default-text-success` defect to fix by hand._
 
-### Bind the DSFR files to the one I want to work in
+### Synchronize
 
-Let's say you have created a new file to mock up your future application:
+Create empty Penpot files for the new version, put their identifiers in `scripts/synchronize.sh`, then synchronize the files in the dependency order:
 
-1. Open your application file
-2. Switch to the `Assets` tab section
-3. Click `Manage library` and wait for it to load fully
-4. Click on the `+` button for shared files `Composants`, `Fondamentaux` and `Pictogrammes`
-5. Then within the `Assets` panel, type in the search bar for example `bouton` and after opening the nested tree you should see:
+```sh
+./scripts/synchronize.sh pictogrammes
+./scripts/synchronize.sh fondamentaux
+./scripts/synchronize.sh composants
+./scripts/synchronize.sh modeles
+./scripts/synchronize.sh beta
+```
 
-   <img src="docs/components_panel.png" alt="" height="350">
+- Each update makes Penpot load and check the whole file, which slows down as the file grows. For a first push of a big file, add `--no-server-validation`, then run the synchronization again (`--use-cached-figma-data` avoids fetching Figma again): it must report no difference. The figpot documentation explains how to validate a whole file afterwards
+- Starting from fresh Penpot files is preferred, changing many identifiers in an existing big file doubles its size during the push
+- The presentation frames of `Composants` are excluded (about half of the file), otherwise the file is too big to be updated through the API
+- At the end, figpot "hydrates" each file: it opens it in a browser so Penpot computes the text layouts that only a browser can compute. It needs a display (`xvfb-run -a ./scripts/synchronize.sh ...` on a server). `--no-hydrate` skips it, but viewers through a share link would see overlapping texts until someone edits the file
 
-6. Drag and drop components to start using them!
+### Publish a release
 
-_Don't forget when searching that the DSFR components were labeled in french: `Header → En-tête`, `Footer → Pied de page`..._
+The files are synchronized on the SIG instance (https://penpot.systeme-de-design.gouv.fr), then exported one by one from its interface, in the dependency order: `Pictogrammes`, `Fondamentaux`, `Composants`, `Modèles`, then `Bêta`.
 
-## Frequently Asked Questions
+1. From the dashboard, open the menu of a file and choose `Export Penpot file`
+2. Pick the 4th option, `Link matching libraries on import`: the libraries are not embedded nor detached, the exported file only keeps their names, so Penpot links them at import to the shared files of the destination team having the same names. This option is only displayed when the instance enables the `export-link-later` flag (not the case of the SIG instance for now)
+3. Attach the 5 files to a new GitHub release (asset names containing `pictogrammes`, `fondamentaux`, `composants`, `modeles` and `beta` are recognized, for example `dsfr_composants_v1-15.penpot`), and do not rename the Penpot files since their names are the ones matched at import
+4. Start the release description with a warning asking not to download the files directly but to follow the tutorial
 
-### Why is it (sometimes) laggy?
+Then run the `Documentation` GitHub Actions workflow manually (`Actions` tab, `Run workflow`, optionally with the release tag) so the tutorial proposes the new files. No text has to be changed in the tutorial: it reads the DSFR version from the names of the release files.
 
-Penpot may suffer from some performance issues, but they are working on a new rendering engine that should fix main issues soon.
+### Continuous integration
 
-In the meantime, make sure to at least try this:
+- `.github/workflows/sync.yml` synchronizes all the files. It is triggered manually and needs the repository secrets `FIGMA_ACCESS_TOKEN`, `PENPOT_ACCESS_TOKEN`, `PENPOT_USER_EMAIL` and `PENPOT_USER_PASSWORD` (not environment ones). The mappings are committed back into `data/` (`--sync-mapping-with-git`)
+- `.github/workflows/documentation.yml` checks and builds the tutorial, its Storybook and the documentation preview in parallel jobs, then deploys them as a static website on GitHub Pages (see [`tutorial/README.md`](tutorial/README.md#deployment))
 
-- Run Penpot within Chrome / Chromium (better supported)
-- Avoid having too many browser tabs open
-- Try it on a computer where you know Figma is running smoothly with "big" files
-- Avoid opening `Composants` and `Fondamentaux` DSFR files directly, rather prefer to use them directly as libraries (will load much less in your browser)
+## Penpot limitations
 
-### Why there are missing "nodes" compared to Figma?
+The limitations met by product teams (missing example boards, component properties, performances…) are explained in the tutorial. Penpot covers what designing with the DSFR needs, but a few features have no equivalent yet:
 
-Penpot is less performant at handling big files either on both the backend and frontend sides. For example, `DSFR - Composants` on Figma has around 500,000 elements and is working well, whereas Penpot may start lagging or crashing at 150,000 elements.
+- Truncating a text with an ellipsis: https://github.com/penpot/penpot/issues/4426
+- A text in a "hug" parent with a "fill" width wraps differently than in Figma: https://github.com/penpot/penpot/discussions/7163
+- Relinking existing copies to another library, needed to move mockups to a new DSFR version
+- Design tokens scoped per component instance, used by the DSFR v2
+- Custom fonts belong to a team, each with its own identifier: imported files keep the identifiers of their original team, and Penpot only relinks them by name when a page is opened, never in libraries (hence the script of the tutorial): https://github.com/penpot/penpot/issues/1035, https://github.com/penpot/penpot/issues/5195
 
-They have plan to improve performance with a new rendering engine, but it will take some time. To make our experiment usable, we decided to:
+## Contribution
 
-1. Remove all elements related to the dark theme (almost all the time our internal designs are made with the light theme)
-2. Remove frames that present a component in multiple contexts (they contain way too many elements)
-
-Think of this port as a technical library for designing your application rather than for discovering the DSFR in detail. In you prefer the latter, prefer [their documentation](https://www.systeme-de-design.gouv.fr/) or open [their Figma files](https://www.figma.com/@gouvfr) to see the missing content in a read-only manner without a Figma subscription.
-
-### DSFR components may have missing properties
-
-Despite Penpot is supporting variants and shows a properties panel at the right, they still don't support specific "display conditions" as:
-
-- A boolean to conditionnaly hide elements across all variants
-- An input to customize the underlying text (here in Penpot you have to modify the text from the canvas or within the layers panel)
-
-This kind of feature inside Penpot does not exist yet and we did not find an easy workaround since we are doing an automatic generation of `penpot-dsfr` from Figma.
-
-## Technical setup of this repository
-
-The automation is based on the "Figma to Penpot" synchronizer named [figpot](https://github.com/betagouv/figpot). See the file `.github/workflows/ci.yaml` for all commands run as a cron job.
-
-_Due to no sponsor of this initiative the synchronization is disabled for now, the current synchronization and export has been run manually._
-
-### Figma files
-
-Figma files onto https://www.figma.com/@gouvfr are not directly used by `penpot-dsfr` because they are owned by the account of [the SIG team](https://www.info.gouv.fr/organisation/service-d-information-du-gouvernement-sig). Since we do not have access to their Figma access token (needed to access extra-information like Figma styles), we copied their files into our own workspace to be able to retrieve all information.
-
-_We will make sure to update our own files when they do updates on theirs._
-
-### GitHub secrets
-
-The CI/CD pipeline requires to have repository secrets (not environment ones):
-
-- `FIGMA_ACCESS_TOKEN`
-- `PENPOT_ACCESS_TOKEN`
-- `PENPOT_USER_EMAIL`
-- `PENPOT_USER_PASSWORD`
-
-_(see the `figpot` documentation to know how to retrieve these values)_
-
-## Contribution or sponsoring
-
-If you are willing to help, please have a look at the reported issues https://github.com/betagouv/penpot-dsfr/issues. I will do my best to address your work, but keep in mind the maintenance of this project is in my spare time or on the time of other contributors.
-
-There is currently no public organization sponsor for this port. But if your entity is willing to take over `penpot-dsfr`, please contact us at [penpot-dsfr@beta.gouv.fr](mailto:penpot-dsfr@beta.gouv.fr).
+If you are willing to help, have a look at [the reported issues](https://github.com/betagouv/penpot-dsfr/issues). For any question, contact us at [penpot-dsfr@beta.gouv.fr](mailto:penpot-dsfr@beta.gouv.fr).
